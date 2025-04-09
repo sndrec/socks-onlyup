@@ -1,7 +1,6 @@
-[gd_scene load_steps=17 format=3 uid="uid://b3sy802m6p2s1"]
+[gd_scene load_steps=15 format=3 uid="uid://b3sy802m6p2s1"]
 
 [ext_resource type="Script" uid="uid://cwmh2o71jyj7y" path="res://scene_base.gd" id="1_uyiya"]
-[ext_resource type="PackedScene" uid="uid://s7xxl4yeqeyk" path="res://mario/start.glb" id="3_djfti"]
 [ext_resource type="Script" uid="uid://cs8ofdk2ib650" path="res://addons/libsm64-godot/components/sm64_surface_properties_component.gd" id="3_kite3"]
 [ext_resource type="Script" uid="uid://13uun38swcuo" path="res://addons/libsm64-godot/handlers/sm64_static_surfaces_handler.gd" id="3_q7bj6"]
 [ext_resource type="Shader" uid="uid://ctqb4hsew8lxt" path="res://death_plane.gdshader" id="3_r8jh6"]
@@ -40,25 +39,14 @@ subdivide_width = 16
 subdivide_depth = 16
 
 [sub_resource type="SM64SurfaceProperties" id="SM64SurfaceProperties_hhvd1"]
-surface_type = 5
+terrain_type = 1
 
-[sub_resource type="CylinderMesh" id="CylinderMesh_brwxj"]
+[sub_resource type="BoxMesh" id="BoxMesh_37666"]
 material = ExtResource("12_8xlox")
-top_radius = 6.0
-bottom_radius = 9.53
-height = 8.0
-radial_segments = 142
-rings = 128
-
-[sub_resource type="BoxMesh" id="BoxMesh_sq71t"]
-material = ExtResource("12_8xlox")
-size = Vector3(4, 4, 8)
+size = Vector3(8, 1, 8)
 
 [node name="Node3D" type="Node3D"]
 script = ExtResource("1_uyiya")
-
-[node name="StartDispl" parent="." instance=ExtResource("3_djfti")]
-transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 8.12168, 0)
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_836n4")
@@ -84,14 +72,18 @@ script = ExtResource("3_q7bj6")
 [node name="SM64SurfaceObjectsHandler" type="Node" parent="."]
 script = ExtResource("4_wwkch")
 
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="."]
-visible = false
-mesh = SubResource("CylinderMesh_brwxj")
+[node name="OnlyUpLevel" type="Node3D" parent="."]
 
-[node name="MeshInstance3D3" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.518117, 0, 0)
-visible = false
-mesh = SubResource("BoxMesh_sq71t")
+[node name="MeshInstance3D2" type="MeshInstance3D" parent="OnlyUpLevel" groups=["libsm64_static_surfaces"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, 0)
+instance_shader_parameters/spawn_dir = Vector3(0, 0, 1)
+instance_shader_parameters/spawn_pos = Vector3(0, 0.5, 0)
+mesh = SubResource("BoxMesh_37666")
+skeleton = NodePath("../..")
 
-[node name="RandomMario" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("10_1ybnx")]
+[node name="SM64SurfacePropertiesComponent" type="Node" parent="OnlyUpLevel/MeshInstance3D2"]
+script = ExtResource("3_kite3")
+surface_properties = SubResource("SM64SurfaceProperties_hhvd1")
+
+[node name="Mario" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("10_1ybnx")]
 camera = NodePath("../Camera3D")

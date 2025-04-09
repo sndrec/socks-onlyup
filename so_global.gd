@@ -40,8 +40,6 @@ func generate_cork_box_with_contents(in_pos : Vector3, contents : Array) -> Cork
 	new_box.contained_items = contents
 	add_child(new_box)
 	return new_box
-	#new_box.add_to_droplist()
-	#var new_box : C
 
 func generate_yellow_coin_at_pos(inPos : Vector3, in_drop_to_ground : bool = true, in_physics : bool = false, in_velocity : Vector3 = Vector3.ZERO) -> Coin:
 	var new_coin := preload("res://mario/coin.tscn").instantiate() as Coin
@@ -104,15 +102,11 @@ func generate_block_from_pos_and_size(inPos : Vector3, inSize : Vector3, north_s
 	surface_properties.surface_properties = SM64SurfaceProperties.new()
 	surface_properties.surface_properties.surface_type = SM64SurfaceProperties.SURFACE_TYPE_DEFAULT
 	new_block.add_child(surface_properties)
-	new_block.set_instance_shader_parameter("fade_in", (float(Time.get_ticks_msec()) / 1000) + float(level_meshes.size()) * 0.01 + 0.2)
+	new_block.set_instance_shader_parameter("fade_in", 0.001 * Time.get_ticks_msec())
 	new_block.set_instance_shader_parameter("spawn_dir", Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)))
 	new_block.set_instance_shader_parameter("spawn_pos", new_block.position)
-	new_block.set_instance_shader_parameter("fade_in_distance", randf_range(2, 10))
-	new_block.set_instance_shader_parameter("fade_in_duration", randf_range(0.3, 0.8))
-	if chatter:
-		new_block.set_instance_shader_parameter("fade_in_duration", 0.125)
-		new_block.set_instance_shader_parameter("fade_in_distance", 0.0)
-		new_block.set_instance_shader_parameter("fade_in", (float(Time.get_ticks_msec()) / 1000))
+	new_block.set_instance_shader_parameter("fade_in_distance", randf_range(1, 2))
+	new_block.set_instance_shader_parameter("fade_in_duration", randf_range(0.1, 0.25))
 	var new_collider := StaticBody3D.new()
 	var new_collider_shape := CollisionShape3D.new()
 	var new_box_shape := arr_mesh.create_convex_shape(true, false)
@@ -148,15 +142,11 @@ func generate_cylinder(inPos : Vector3, in_height : float, in_radius_bot : float
 		new_block.movement_parent = in_parent
 	add_child(new_block)
 	new_block.add_child(surface_properties)
-	new_block.set_instance_shader_parameter("fade_in", (float(Time.get_ticks_msec()) / 1000) + float(level_meshes.size()) * 0.01 + 0.2)
+	new_block.set_instance_shader_parameter("fade_in", 0.001 * Time.get_ticks_msec())
 	new_block.set_instance_shader_parameter("spawn_dir", Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)))
 	new_block.set_instance_shader_parameter("spawn_pos", new_block.position)
-	new_block.set_instance_shader_parameter("fade_in_distance", randf_range(2, 10))
-	new_block.set_instance_shader_parameter("fade_in_duration", randf_range(0.3, 0.8))
-	if chatter:
-		new_block.set_instance_shader_parameter("fade_in_duration", 0.125)
-		new_block.set_instance_shader_parameter("fade_in_distance", 0.0)
-		new_block.set_instance_shader_parameter("fade_in", (float(Time.get_ticks_msec()) / 1000))
+	new_block.set_instance_shader_parameter("fade_in_distance", randf_range(1, 2))
+	new_block.set_instance_shader_parameter("fade_in_duration", randf_range(0.1, 0.25))
 	var new_collider := StaticBody3D.new()
 	var new_collider_shape := CollisionShape3D.new()
 	var new_collision_shape := new_mesh.create_convex_shape(true, false)
@@ -169,16 +159,6 @@ func generate_cylinder(inPos : Vector3, in_height : float, in_radius_bot : float
 	
 	level_meshes.append(new_block)
 	return new_block
-
-# save block structure:
-# seed : string
-# coins : int
-# star_data : Dictionary{StarSaveData} with the star ID as the key
-
-# star save data structure:
-# star_id : string
-# time : float
-
 
 func _ready():
 	add_child(global_sound)

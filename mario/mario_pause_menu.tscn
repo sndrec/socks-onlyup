@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://bdc07kwcxglgb"]
+[gd_scene load_steps=10 format=3 uid="uid://bdc07kwcxglgb"]
 
 [ext_resource type="Script" uid="uid://d2pq8ujyawoqk" path="res://mario/mario_pause_menu.gd" id="1_muu6i"]
 [ext_resource type="FontFile" uid="uid://c25d003g01x4h" path="res://mario/Mario64.ttf" id="1_mvtme"]
@@ -13,22 +13,7 @@ font = ExtResource("1_mvtme")
 font_size = 24
 font_color = Color(0.2, 0.2, 0.2, 1)
 
-[sub_resource type="LabelSettings" id="LabelSettings_pj5mv"]
-font = ExtResource("1_mvtme")
-font_size = 24
-font_color = Color(0.2, 0.2, 0.2, 1)
-
-[sub_resource type="LabelSettings" id="LabelSettings_mdaqi"]
-font = ExtResource("1_mvtme")
-font_size = 24
-font_color = Color(0.2, 0.2, 0.2, 1)
-
 [sub_resource type="LabelSettings" id="LabelSettings_dear8"]
-font = ExtResource("1_mvtme")
-font_size = 24
-font_color = Color(0.2, 0.2, 0.2, 1)
-
-[sub_resource type="LabelSettings" id="LabelSettings_jv1yw"]
 font = ExtResource("1_mvtme")
 font_size = 24
 font_color = Color(0.2, 0.2, 0.2, 1)
@@ -131,28 +116,10 @@ text = "Resume"
 label_settings = SubResource("LabelSettings_5f5i0")
 horizontal_alignment = 1
 
-[node name="RespawnLabel" type="Label" parent="Control/LabelContainer"]
-layout_mode = 2
-text = "Retry"
-label_settings = SubResource("LabelSettings_pj5mv")
-horizontal_alignment = 1
-
-[node name="GenerateNewLevelLabel" type="Label" parent="Control/LabelContainer"]
-layout_mode = 2
-text = "Generate Random New Level"
-label_settings = SubResource("LabelSettings_mdaqi")
-horizontal_alignment = 1
-
 [node name="ViewStageLabel" type="Label" parent="Control/LabelContainer"]
 layout_mode = 2
 text = "View Level"
 label_settings = SubResource("LabelSettings_dear8")
-horizontal_alignment = 1
-
-[node name="HistoryLabel" type="Label" parent="Control/LabelContainer"]
-layout_mode = 2
-text = "History"
-label_settings = SubResource("LabelSettings_jv1yw")
 horizontal_alignment = 1
 
 [node name="SettingsLabel" type="Label" parent="Control/LabelContainer"]
@@ -201,56 +168,3 @@ layout_mode = 2
 size_flags_vertical = 1
 text = "$ x 5,493"
 label_settings = SubResource("LabelSettings_6w4g4")
-
-[node name="GeneratePrompt" type="Control" parent="."]
-layout_mode = 1
-anchor_left = 0.312
-anchor_top = 0.68
-anchor_right = 0.687
-anchor_bottom = 0.717
-offset_left = 1.27997
-offset_top = -0.160034
-offset_right = 1.27991
-offset_bottom = 0.520996
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="ColorRect" type="ColorRect" parent="GeneratePrompt"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-anchor_bottom = 1.464
-offset_right = 9.15527e-05
-offset_bottom = 0.00203323
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 0.470588)
-
-[node name="HBoxContainer" type="HBoxContainer" parent="GeneratePrompt/ColorRect"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="SeedButton" type="Button" parent="GeneratePrompt/ColorRect/HBoxContainer"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("1_mvtme")
-theme_override_font_sizes/font_size = 24
-text = "  Generate  From  Seed"
-flat = true
-
-[node name="SeedText" type="LineEdit" parent="GeneratePrompt/ColorRect/HBoxContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_fonts/font = ExtResource("1_mvtme")
-theme_override_font_sizes/font_size = 24
-placeholder_text = "Input seed..."
-max_length = 32
-context_menu_enabled = false
-drag_and_drop_selection_enabled = false
-flat = true
-
-[connection signal="pressed" from="GeneratePrompt/ColorRect/HBoxContainer/SeedButton" to="." method="_on_seed_button_pressed"]
-[connection signal="text_submitted" from="GeneratePrompt/ColorRect/HBoxContainer/SeedText" to="." method="_on_seed_text_text_submitted"]

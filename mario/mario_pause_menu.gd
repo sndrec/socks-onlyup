@@ -1,16 +1,10 @@
 class_name MarioPauseMenu extends Control
 
 @onready var resume_label = $Control/LabelContainer/ResumeLabel
-@onready var respawn_label = $Control/LabelContainer/RespawnLabel
-@onready var generate_new_level_label = $Control/LabelContainer/GenerateNewLevelLabel
 @onready var view_stage_label = $Control/LabelContainer/ViewStageLabel
-@onready var history_label = $Control/LabelContainer/HistoryLabel
 @onready var settings_label = $Control/LabelContainer/SettingsLabel
 @onready var exit_label = $Control/LabelContainer/ExitLabel
 @onready var label_container = $Control/LabelContainer
-@onready var generate_prompt = $GeneratePrompt
-@onready var seed_text := $GeneratePrompt/ColorRect/HBoxContainer/SeedText as LineEdit
-@onready var seed_button = $GeneratePrompt/ColorRect/HBoxContainer/SeedButton
 @onready var restart_request = $RestartRequest
 
 var selected_menu_option : int = 0
@@ -47,47 +41,24 @@ func change_menu_selection(desired_selected : int) -> void:
 		0:
 			resume_label.label_settings.font_color = Color(1, 1, 1)
 		1:
-			respawn_label.label_settings.font_color = Color(1, 1, 1)
-		2:
-			generate_new_level_label.label_settings.font_color = Color(1, 1, 1)
-		3:
 			view_stage_label.label_settings.font_color = Color(1, 1, 1)
-		4:
-			history_label.label_settings.font_color = Color(1, 1, 1)
-		5:
+		2:
 			settings_label.label_settings.font_color = Color(1, 1, 1)
-		6:
+		3:
 			exit_label.label_settings.font_color = Color(1, 1, 1)
 
 func call_selection_function(desired_button : int) -> void:
 	match desired_button:
 		0: # resume
 			_unpause()
-		1: # retry
-			SOGlobal.current_mario._respawn_mario()
-			SOGlobal.play_sound(preload("res://mario/enter_painting.WAV"))
-			for child in SOGlobal.get_children():
-				if child is PowerStar:
-					child._respawn()
-				if child is Coin:
-					child._respawn()
-			_unpause()
-		2: # generate new level
-			SOGlobal.current_level_manager._create_mario_world()
-			_unpause()
-		3: # view level
+		1: # view level
 			print("todo")
-		4: # seed history
-			var seed_history_ui = preload("res://mario/seed_history.tscn").instantiate()
-			seed_history_ui.pause_menu = self
-			add_child(seed_history_ui)
-			hide_pause_menu = true
-		5: # open settings
+		2: # open settings
 			var settings_ui = preload("res://mario/settings_menu.tscn").instantiate()
 			settings_ui.pause_menu = self
 			add_child(settings_ui)
 			hide_pause_menu = true
-		6: # quit
+		3: # quit
 			SOGlobal.save_data.save_game()
 			get_tree().quit()
 
@@ -104,11 +75,9 @@ func _unpause() -> void:
 func _process(delta):
 	if hide_pause_menu:
 		control.visible = false
-		generate_prompt.visible = false
 		return
 	else:
 		control.visible = true
-		generate_prompt.visible = true
 	
 	if SOGlobal.unfocused:
 		return
@@ -139,11 +108,3 @@ func _process(delta):
 	
 	if Input.is_action_just_pressed("mario_b") or Input.is_action_just_pressed("start_button"):
 		_unpause()
-
-func _on_seed_button_pressed():
-	SOGlobal.current_level_manager._create_mario_world(seed_text.text)
-	_unpause()
-
-func _on_seed_text_text_submitted(new_text):
-	SOGlobal.current_level_manager._create_mario_world(seed_text.text)
-	_unpause()

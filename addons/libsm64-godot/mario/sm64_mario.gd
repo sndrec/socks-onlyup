@@ -360,12 +360,6 @@ func extend_cap(cap_time: float) -> void:
 		return
 	_internal.extend_cap(cap_time)
 
-
-#_cam_rotation - int
-#_cam_zoom - int
-#_cam_tilt - float
-#_cam_target - vector
-#_cam_target_dist - float
 var finish_time : float = -1.0
 var current_coin_count : int = 0
 
@@ -384,7 +378,6 @@ func _get_power_star(in_star_id : String) -> void:
 	await get_tree().create_timer(1.2).timeout
 	saysound_playback.play_stream(preload("res://mario/here_we_go.wav"), 0, 10, 1.0)
 
-var ready_to_play : bool = false
 var preview_cam_yaw : float = 0
 var preview_cam_pitch : float = 0
 var preview_cam_zoom : float = 0
@@ -561,34 +554,15 @@ func _tick(delta: float) -> void:
 		return
 	if SOGlobal.unfocused:
 		return
-	if position.y <= -32:
-		if checkpoint_flag and is_instance_valid(checkpoint_flag):
-			_restore_mario_to_checkpoint()
-		else: if !needs_respawning:
-			needs_respawning = true
-			_respawn_mario()
 	
-	if _action == SM64MarioAction.STAR_DANCE_EXIT and !_paused and ready_to_play:
-		if Input.is_action_just_pressed("mario_a"):
-			_internal.set_action(SM64MarioAction.IDLE)
-		if Input.is_action_just_pressed("mario_b"):
-			_internal.set_action(SM64MarioAction.SPAWN_SPIN_AIRBORNE)
-			SOGlobal.current_level_manager._create_mario_world()
+	if !hide_hud:
+		level_timer.visible = true
+	var timer_seconds : float = float(finish_time - start_time) * 0.001
+	if finish_time < 0:
+		timer_seconds = float(Time.get_ticks_msec() - start_time) * 0.001
+	level_timer.text = "%02d:%02d.%03d" % [timer_seconds/60.0, fmod(timer_seconds, 60.0), fmod(timer_seconds * 1000, 1000.0)]
 	
-	if _paused or !ready_to_play:
-		level_timer.visible = false
-	else:
-		if !hide_hud:
-			level_timer.visible = true
-		var timer_seconds : float = float(finish_time - start_time) * 0.001
-		if finish_time < 0:
-			timer_seconds = float(Time.get_ticks_msec() - start_time) * 0.001
-		level_timer.text = "%02d:%02d.%03d" % [timer_seconds/60.0, fmod(timer_seconds, 60.0), fmod(timer_seconds * 1000, 1000.0)]
-	
-	if ready_to_play:
-		visible = true
-	else:
-		visible = false
+	visible = true
 	
 	if _paused:
 		return
@@ -624,65 +598,18 @@ func _tick(delta: float) -> void:
 	
 	
 	var time_minus_start = Time.get_ticks_msec() - SOGlobal.level_start_time
-	if !ready_to_play:
-		if Input.is_action_just_pressed("mario_a"):
-			SOGlobal.play_sound(preload("res://mario/enter_painting.WAV"))
-			ready_to_play = true
-			start_time = Time.get_ticks_msec()
-			_respawn_mario()
-		preview_cam_pitch += Input.get_axis(stick_up, stick_down) * delta * 90
-		preview_cam_yaw += Input.get_axis(stick_left, stick_right) * delta * 90
-		preview_cam_pan_pitch += camera_input.y * delta * -360
-		preview_cam_pan_yaw += camera_input.x * delta * -720
-		preview_cam_pan_yaw = lerp(preview_cam_pan_yaw, 0.0, delta * 6)
-		preview_cam_pan_pitch = lerp(preview_cam_pan_pitch, 0.0, delta * 6)
-		preview_cam_zoom += Input.get_axis("dpad_up", "dpad_down") * delta
-		preview_cam_pitch = clamp(preview_cam_pitch, -45.0, 45.0)
-		var cam_desired_rotation : Vector3 = Vector3(preview_cam_pitch, preview_cam_yaw, 0)
-		var final_position : Vector3 = camera.position
-		var final_rotation : Basis = camera.basis
-		camera.rotation_degrees = cam_desired_rotation
-		camera.position = camera.basis.z * SOGlobal.level_bounds.get_longest_axis_size() * preview_cam_zoom + SOGlobal.level_bounds.get_center()
-		camera.rotation_degrees += Vector3(preview_cam_pan_pitch, preview_cam_pan_yaw, 0)
-		camera.rotation_degrees.x = clamp(camera.rotation_degrees.x, -45.0, 45.0)
-		view_stage_transform = camera.global_transform
-		return
 	
 	mario_collision.position.y = 0.25
 	collision_cylinder.radius = 0.5
 	collision_cylinder.height = 1.75
 	
-	#print(action & SM64MarioAction.FLAG_STATIONARY > 0)
-	
-	if action & SM64MarioAction.FLAG_STATIONARY > 0:
-		if Input.is_action_just_pressed("dpad_up"):
-			_create_checkpoint()
-	
 	match action:
-		SM64MarioAction.SPAWN_SPIN_AIRBORNE:
-			global_position = snapped(global_position, Vector3(0.5, 0, 0.5))
-			#teleport(global_position)
-			_velocity = _velocity * Vector3(0, 1, 0)
 		SM64MarioAction.GROUND_POUND:
 			mario_collision.position.y = -0.5
 			collision_cylinder.height = 2.0
 			collision_cylinder.radius = 1.25
 	
-	if Input.is_action_just_pressed("dpad_down") and checkpoint_flag and is_instance_valid(checkpoint_flag):
-		_restore_mario_to_checkpoint()
-		
-	
-	if Time.get_ticks_msec() > gravity_set_time + 10000:
-		gravity_add = 0
-	
-	if gravity_add != 0:
-		velocity += Vector3(0, gravity_add * delta, 0)
-	
 	var tick_output := _internal.tick(delta, _mario_input)
-	
-	#DebugDraw2D.set_text("POS", global_position)
-	
-	#_internal.set_action(SM64MarioAction.STAR_DANCE_NO_EXIT)
 	
 	global_position = tick_output.position as Vector3
 	_velocity = tick_output.velocity as Vector3
@@ -723,10 +650,9 @@ func _tick(delta: float) -> void:
 	_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, mesh_array)
 	_mesh_instance.set_surface_override_material(0, _material)
 	
-	if ready_to_play:
-		_calculate_gameplay_camera(delta)
-		var gameplay_camera_transform : Transform3D = camera.global_transform
-		if false and time_since_start <= 1.0:
-			var ratio : float = 1.0 - time_since_start
-			ratio = ease(ratio, -2)
-			camera.global_transform = camera.global_transform.interpolate_with(view_stage_transform, ratio)
+	_calculate_gameplay_camera(delta)
+	var gameplay_camera_transform : Transform3D = camera.global_transform
+	if false and time_since_start <= 1.0:
+		var ratio : float = 1.0 - time_since_start
+		ratio = ease(ratio, -2)
+		camera.global_transform = camera.global_transform.interpolate_with(view_stage_transform, ratio)
