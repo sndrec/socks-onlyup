@@ -1,0 +1,186 @@
+[gd_scene load_steps=19 format=3 uid="uid://cg8l4angkunu5"]
+
+[ext_resource type="Script" uid="uid://b06tba8jwus0a" path="res://addons/libsm64-godot/mario/sm64_mario.gd" id="1_vy05d"]
+[ext_resource type="FontFile" uid="uid://c25d003g01x4h" path="res://mario/Mario64.ttf" id="2_3w352"]
+[ext_resource type="Texture2D" uid="uid://dhp0h2p7egisy" path="res://mario/shadow.png" id="3_cdwnk"]
+[ext_resource type="FontFile" uid="uid://bi3mvp2yj72db" path="res://mario/ui_lettering.png" id="4_p843u"]
+[ext_resource type="Shader" uid="uid://dkr305k56aqxu" path="res://mario/power_ui.gdshader" id="5_cfhc3"]
+[ext_resource type="Texture2D" uid="uid://dyms68ekl5gio" path="res://mario/checkerboard.png" id="6_0vgae"]
+[ext_resource type="Texture2D" uid="uid://bb6iaa2qu36la" path="res://mario/power_head_mask.png" id="7_mmu4j"]
+[ext_resource type="Texture2D" uid="uid://cen8uruthosia" path="res://mario/power_text_mask.png" id="8_xynuk"]
+[ext_resource type="Texture2D" uid="uid://csm3y75usd5u5" path="res://mario/health_slices.png" id="9_0e7ou"]
+[ext_resource type="Shader" uid="uid://dm2r3fx38qq7f" path="res://mario/health_slices.gdshader" id="9_03fle"]
+
+[sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_a3013"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_55yaj"]
+height = 1.5
+
+[sub_resource type="LabelSettings" id="LabelSettings_6h3om"]
+font = ExtResource("2_3w352")
+font_size = 24
+shadow_color = Color(0, 0, 0, 0.666667)
+shadow_offset = Vector2(2, 2)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_iy0ix"]
+height = 6.0
+radius = 4.0
+
+[sub_resource type="LabelSettings" id="LabelSettings_46e2l"]
+font = ExtResource("4_p843u")
+font_size = 52
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7qgrv"]
+shader = ExtResource("5_cfhc3")
+shader_parameter/checkerRepeat = 12.0
+shader_parameter/checkerRotate = -0.1
+shader_parameter/outlineSize = 6.58
+shader_parameter/checkerScrollSpeed = Vector2(0.2, -0.1)
+shader_parameter/outlineColor = Color(0.447059, 0.745098, 0.917647, 1)
+shader_parameter/topGradientCheck1 = Color(0.34902, 0.631373, 0.901961, 1)
+shader_parameter/bottomGradientCheck1 = Color(0.207843, 0.356863, 0.490196, 1)
+shader_parameter/topGradientCheck2 = Color(0.129412, 0.372549, 0.588235, 1)
+shader_parameter/bottomGradientCheck2 = Color(0, 0.172549, 0.321569, 1)
+shader_parameter/checkerTexture = ExtResource("6_0vgae")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ywjq4"]
+shader = ExtResource("5_cfhc3")
+shader_parameter/checkerRepeat = 16.0
+shader_parameter/checkerRotate = 0.1
+shader_parameter/outlineSize = -0.36
+shader_parameter/checkerScrollSpeed = Vector2(-0.05, 0.15)
+shader_parameter/outlineColor = Color(1, 1, 1, 1)
+shader_parameter/topGradientCheck1 = Color(1, 1, 1, 1)
+shader_parameter/bottomGradientCheck1 = Color(1, 1, 1, 1)
+shader_parameter/topGradientCheck2 = Color(1, 0.858824, 0.866667, 1)
+shader_parameter/bottomGradientCheck2 = Color(1, 1, 1, 1)
+shader_parameter/checkerTexture = ExtResource("6_0vgae")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ya0m5"]
+shader = ExtResource("9_03fle")
+shader_parameter/wedges = 8.0
+
+[node name="Mario" type="Node3D"]
+script = ExtResource("1_vy05d")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = SubResource("AudioStreamPolyphonic_a3013")
+autoplay = true
+max_polyphony = 8
+
+[node name="MarioCollision" type="Area3D" parent="."]
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionCylinder" type="CollisionShape3D" parent="MarioCollision"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.556764, 0)
+shape = SubResource("CylinderShape3D_55yaj")
+
+[node name="Decal" type="Decal" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -15.995, 0)
+size = Vector3(1, 32, 1)
+texture_albedo = ExtResource("3_cdwnk")
+normal_fade = 0.5
+upper_fade = 1e-05
+
+[node name="LevelTimer" type="Label" parent="."]
+anchors_preset = -1
+anchor_top = 0.015
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -0.225
+grow_horizontal = 2
+grow_vertical = 2
+text = "40:02.394"
+label_settings = SubResource("LabelSettings_6h3om")
+horizontal_alignment = 1
+
+[node name="SpawnLineCast" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+enabled = false
+target_position = Vector3(0, -12, 0)
+
+[node name="SpawnCast" type="ShapeCast3D" parent="."]
+enabled = false
+shape = SubResource("CylinderShape3D_iy0ix")
+target_position = Vector3(0, -2, 0)
+debug_shape_custom_color = Color(1, 1, 1, 1)
+
+[node name="CoinCounter" type="Label" parent="."]
+texture_filter = 1
+texture_repeat = 1
+anchors_preset = -1
+anchor_left = 0.027
+anchor_top = 0.05
+anchor_right = 0.138
+anchor_bottom = 0.108
+offset_left = -0.0760002
+offset_top = 0.0999985
+offset_right = 0.0559845
+offset_bottom = 0.0159988
+text = "$*0"
+label_settings = SubResource("LabelSettings_46e2l")
+
+[node name="StarCounter" type="Label" parent="."]
+texture_filter = 1
+texture_repeat = 1
+anchors_preset = -1
+anchor_left = 0.027
+anchor_top = 0.05
+anchor_right = 0.138
+anchor_bottom = 0.108
+offset_left = -0.560001
+offset_top = 60.0
+offset_right = -0.428024
+offset_bottom = 70.24
+text = "@*0"
+label_settings = SubResource("LabelSettings_46e2l")
+
+[node name="PowerDisp" type="TextureRect" parent="."]
+material = SubResource("ShaderMaterial_7qgrv")
+anchors_preset = -1
+anchor_left = 0.868
+anchor_top = 0.039
+anchor_right = 0.97
+anchor_bottom = 0.221
+offset_left = -0.0400391
+offset_top = -0.0799999
+offset_right = 0.227905
+offset_bottom = -0.292023
+grow_horizontal = 2
+size_flags_vertical = 0
+texture = ExtResource("7_mmu4j")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="PowerText" type="TextureRect" parent="PowerDisp"]
+material = SubResource("ShaderMaterial_ywjq4")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 0
+texture = ExtResource("8_xynuk")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="HealthWedges" type="TextureRect" parent="PowerDisp"]
+material = SubResource("ShaderMaterial_ya0m5")
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.279
+anchor_top = 0.067
+anchor_right = 0.771
+anchor_bottom = 0.559
+offset_left = 0.0512276
+offset_top = -0.0737171
+offset_right = -0.0287933
+offset_bottom = -0.0640869
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 0
+texture = ExtResource("9_0e7ou")
+expand_mode = 2
+stretch_mode = 4

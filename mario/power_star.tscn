@@ -1,0 +1,71 @@
+[gd_scene load_steps=8 format=4 uid="uid://d3lw47lfofslh"]
+
+[ext_resource type="Script" uid="uid://dop70wbgetbpu" path="res://mario/power_star.gd" id="1_u4xin"]
+[ext_resource type="Shader" uid="uid://jb7chanoaddr" path="res://EnvironmentMap.gdshader" id="2_savh8"]
+[ext_resource type="Texture2D" uid="uid://cwt81cb746m7q" path="res://mario/env_map_shiny_blurry.png" id="3_awppy"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_658mp"]
+render_priority = 0
+shader = ExtResource("2_savh8")
+shader_parameter/albedo = Color(0.729412, 0.611765, 0.345098, 0.392157)
+shader_parameter/albedo_texture = ExtResource("3_awppy")
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_23ag4"]
+_surfaces = [{
+"aabb": AABB(-0.475528, -0.135488, -0.5, 0.951057, 0.270975, 0.904508),
+"format": 34896613377,
+"index_count": 60,
+"index_data": PackedByteArray("CgABAAAACgACAAEACgADAAIACgAEAAMACgAFAAQACgAGAAUACgAHAAYACgAIAAcACgAJAAgACgAAAAkACwAAAAEAAgALAAEACwACAAMABAALAAMABQALAAQACwAFAAYABwALAAYACwAHAAgACwAIAAkAAAALAAkA"),
+"lods": [0.0994835, PackedByteArray("CgAFAAEACgAHAAUACgAJAAcACgABAAkABQALAAEACwAFAAcACwAHAAkAAQALAAkA"), 0.158132, PackedByteArray("CgAFAAEABQALAAEACwAFAAoAAQALAAoA")],
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 12,
+"vertex_data": PackedByteArray("/3//fwAAAACTW/9/zFgAAAAA/3/IYQAAEEX/f6WhAADkMP9///8AAP9//3+qzgAAGs//f///AADuuv9/paEAAP///3/IYQAAa6T/f8xYAAD/f///go0AAP9/AACCjQAA")
+}]
+blend_shape_mode = 0
+
+[sub_resource type="ArrayMesh" id="ArrayMesh_uwwu3"]
+resource_name = "level1_ref_Circle"
+_surfaces = [{
+"aabb": AABB(-0.475528, -0.135488, -0.5, 0.951057, 0.270975, 0.904508),
+"attribute_data": PackedByteArray("/38AAJNbzFgAAMhhEEWloeQw////f6rOGs///+66paH//8hha6TMWP9/go3/f4KNk1vMWJNbzFiTW8xY/3+qzv9/qs7/f6rO/3+Cjf9/go3/f4KN/3+Cjf9/go3/f4KNk1vMWJNbzFiTW8xYk1vMWP9/qs7/f6rO/3+qzv9/qs7uuqWh7rqloe66paHuuqWha6TMWGukzFhrpMxYa6TMWP9/go3/f4KN/3+Cjf9/go3/f4KN/3+Cjf9/go3/f4KN"),
+"format": 34896613399,
+"index_count": 60,
+"index_data": PackedByteArray("CgABAAAACgACAAEACgADAAIACgAEAAMACgAFAAQACgAGAAUACgAHAAYACgAIAAcACgAJAAgACgAAAAkACwAAAAEAAgALAAEACwACAAMABAALAAMABQALAAQACwAFAAYABwALAAYACwAHAAgACwAIAAkAAAALAAkA"),
+"lods": [0.0994835, PackedByteArray("KAAcABgAKQAgAB0AKgAkACEAKwAZACUAHgAsABoALQAfACIALgAjACYAGwAvACcA"), 0.158132, PackedByteArray("EgAPAAwAEAAVAA0AFgARABMADgAXABQA")],
+"material": SubResource("ShaderMaterial_658mp"),
+"primitive": 3,
+"uv_scale": Vector4(0, 0, 0, 0),
+"vertex_count": 48,
+"vertex_data": PackedByteArray("/3//fwAAAACTW/9/zFigBAAA/3/IYewNEEX/f6WhFz/kMP9////HZf9//3+qzv5/Gs//f///x2Xuuv9/paEXP////3/IYewNa6T/f8xYLQj/f///go3/v/9/AACCjf8/k1v/f8xYnTiTW/9/zFg4OJNb/3/MWL4G/3//f6rOElD/f/9/qs74Vf9//3+qzs9g/3///4KNb7r/f///go1Vsf9///+CjXPp/38AAIKNR0n/fwAAgo3QVP9/AACCjQUSk1v/f8xYezeTW/9/zFiRJZNb/3/MWFk1k1v/f8xYaRj/f/9/qs6GUP9//3+qzgRa/3//f6rOBlH/f/9/qs7pXu66/3+loWA+7rr/f6Wh3Tbuuv9/paF6P+66/3+lofQwa6T/f8xYKxprpP9/zFigIGuk/3/MWKEca6T/f8xYmhv/f///go20t/9///+CjTy1/3///4KNnsj/f///go34z/9/AACCjVJF/38AAIKNEEv/fwAAgo3+MP9/AACCjaws////f1Qr0I/nQBCTvGC1tfh4VuP/f///VmMHB7Y1Qh8QExc/ThrATP///38AAP9/yfgaZ9orVn+QlfEEdeyIk6kXqJfKYDUfIvPbjDzQPVAwyDFI4hTilAg690V7R4M4eP1UlxXm61TnKjJ/Si+lbj/kvpsj8SRxIhsim5YNaHKZ1d8NUDuiAbMnzTlxMmA/xd2wamfbp5mqB0hV4Bf1tFbsqJOI9Ih0PeI+Yu39EIIXFBaUsw5McQEe/mHvA+6D")
+}]
+blend_shape_mode = 0
+shadow_mesh = SubResource("ArrayMesh_23ag4")
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_04itl"]
+height = 1.35
+radius = 0.85
+
+[node name="PowerStar" type="Node3D"]
+script = ExtResource("1_u4xin")
+
+[node name="StarMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1.5, 0, 0, 0, -6.55671e-08, -1.5, 0, 1.5, -6.55671e-08, 0, 0, 0)
+mesh = SubResource("ArrayMesh_uwwu3")
+skeleton = NodePath("")
+
+[node name="Area3D" type="Area3D" parent="."]
+collision_layer = 2
+collision_mask = 2
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("CylinderShape3D_04itl")
+
+[node name="ShapeCast3D" type="ShapeCast3D" parent="."]
+enabled = false
+shape = SubResource("CylinderShape3D_04itl")
+target_position = Vector3(0, -0.5, 0)
+
+[connection signal="area_entered" from="Area3D" to="." method="_on_area_3d_area_entered"]
