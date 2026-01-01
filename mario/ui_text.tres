@@ -1,0 +1,7 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://bl762yb1x7p1q"]
+
+[ext_resource type="Shader" uid="uid://c76s4wxohuruq" path="res://mario/condense_ui_text.gdshader" id="1_lxr4s"]
+
+[resource]
+shader = ExtResource("1_lxr4s")
+shader_parameter/font_size = 42.0
