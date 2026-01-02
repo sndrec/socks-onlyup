@@ -7,11 +7,11 @@ void vertex() {
 }
 
 void fragment() {
-	float modified_alpha = COLOR.a;
 	if (COLOR.r < (8.0 - wedges) / 8.0 + 0.05){
-		modified_alpha = 0.0;
+		COLOR = vec4(0.0, 0.0, 0.0, COLOR.a / 2.0);
+	} else {
+		COLOR = vec4(1.0, 1.0, 1.0, COLOR.a);
 	}
-	COLOR = vec4(1.0, 1.0, 1.0, modified_alpha);
 }
 
 void light() {

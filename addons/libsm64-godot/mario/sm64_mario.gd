@@ -129,6 +129,7 @@ var _health := FULL_HEALTH:
 		_health = value
 		health_changed.emit(_health)
 		health_wedges_changed.emit(health_wedges)
+		_update_power_disp_color()
 ## Mario's health (2 bytes, upper byte is the number of health wedges, lower byte portion of next wedge)
 var health: int:
 	get:
@@ -269,6 +270,7 @@ func _physics_process(delta: float) -> void:
 
 ## Create Mario (requires initializing the libsm64 via the global_init function)
 func create() -> void:
+	_update_power_disp_color()
 	if SM64Global.is_init():
 		if _id >= 0:
 			delete()
@@ -676,3 +678,13 @@ func _tick(delta: float) -> void:
 		var ratio : float = 1.0 - time_since_start
 		ratio = ease(ratio, -2)
 		camera.global_transform = camera.global_transform.interpolate_with(view_stage_transform, ratio)
+
+func _update_power_disp_color() -> void:
+	var hue : float = [0.0, 0.0, 0.05, 0.11, 0.18, 0.27, 0.37, 0.47, 0.57][clamp(health_wedges, 0, 8)]
+	var base_saturation := 0.0 if health_wedges == 0 else 1.0
+	var base_value := 0.4 if health_wedges == 0 else 1.0
+	power_disp.material.set_shader_parameter("outlineColor",         Color.from_hsv(hue, base_saturation * 0.75, base_value))
+	power_disp.material.set_shader_parameter("topGradientCheck1",    Color.from_hsv(hue, base_saturation * 0.8,  base_value * 0.75))
+	power_disp.material.set_shader_parameter("bottomGradientCheck1", Color.from_hsv(hue, base_saturation * 0.8,  base_value * 0.5))
+	power_disp.material.set_shader_parameter("topGradientCheck2",    Color.from_hsv(hue, base_saturation,        base_value * 0.5))
+	power_disp.material.set_shader_parameter("bottomGradientCheck2", Color.from_hsv(hue, base_saturation,        base_value * 0.25))
