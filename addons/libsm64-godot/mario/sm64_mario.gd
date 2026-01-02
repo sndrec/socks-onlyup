@@ -214,12 +214,15 @@ var _cam_dir := Vector3(0, 0, 1)
 var _cam_target_dist := 0.0
 var _mario_input := {}
 @onready var level_timer := $LevelTimer as Label
+@onready var respawn_timer := $RespawnTimer as Label
 @onready var coin_counter = $CoinCounter
 @onready var star_counter = $StarCounter
+@onready var elevation_counter = $ElevationCounter
 @onready var power_disp = $PowerDisp
 @onready var health_wedges_disp = $PowerDisp/HealthWedges
 
 var _paused : bool = false
+var _respawn_button_hold_time : float = 0.0
 
 
 func _ready() -> void:
@@ -371,7 +374,7 @@ func _get_power_star(in_star_id : String) -> void:
 	var audio_player : AudioStreamPlaybackPolyphonic = audio_stream_player.get_stream_playback()
 	audio_player.play_stream(preload("res://mario/enter_painting.WAV"), 0, -8, 1.0)
 	await get_tree().create_timer(0.5).timeout
-	audio_player.play_stream(preload("res://mario/star_get.wav"), 0, 0, 1.0)
+	audio_player.play_stream(preload("res://mario/star_get_socks.ogg"), 0, 0, 1.0)
 	#_internal.set_action(SM64MarioAction.FALL_AFTER_STAR_GRAB)
 	set_angle((camera.position - position).normalized())
 	await get_tree().create_timer(1.2).timeout
@@ -559,9 +562,13 @@ func _tick(delta: float) -> void:
 	var timer_seconds : float = float(finish_time - start_time) * 0.001
 	if finish_time < 0:
 		timer_seconds = float(Time.get_ticks_msec() - start_time) * 0.001
-	level_timer.text = "%02d:%02d.%03d" % [timer_seconds/60.0, fmod(timer_seconds, 60.0), fmod(timer_seconds * 1000, 1000.0)]
-	
+	if timer_seconds < 3600.0:
+		level_timer.text = "%02d:%02d.%03d" % [timer_seconds/60.0, fmod(timer_seconds, 60.0), fmod(timer_seconds * 1000, 1000.0)]
+	else:
+		level_timer.text = "%d:%02d:%02d.%03d" % [timer_seconds/3600.0, fmod(timer_seconds/60.0, 60.0), fmod(timer_seconds, 60.0), fmod(timer_seconds * 1000, 1000.0)]
 	visible = true
+	
+	elevation_counter.text = "%dm" % [position.y]
 	
 	if _paused:
 		return
@@ -594,7 +601,21 @@ func _tick(delta: float) -> void:
 	_mario_input.a = Input.is_action_pressed(input_a)
 	_mario_input.b = Input.is_action_pressed(input_b)
 	_mario_input.z = Input.is_action_pressed(input_z)
+	_mario_input.any_movement = _mario_input.stick or _mario_input.a or _mario_input.b or _mario_input.z
 	
+	if Input.is_action_pressed("debug_restart"):
+		if _mario_input.any_movement:
+			_respawn_button_hold_time = 0.0
+			respawn_timer.text = ""
+		elif not (action & SM64MarioAction.FLAG_AIR):
+			_respawn_button_hold_time += delta
+			respawn_timer.text = "Keep holding to respawn... %.1f" % [3.0 - _respawn_button_hold_time]
+			if _respawn_button_hold_time >= 3.0:
+				_restore_mario_to_checkpoint()
+				_respawn_button_hold_time = 0.0
+	elif Input.is_action_just_released("debug_restart"):
+		_respawn_button_hold_time = 0.0
+		respawn_timer.text = ""
 	
 	var time_minus_start = Time.get_ticks_msec() - SOGlobal.level_start_time
 	

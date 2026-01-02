@@ -19,6 +19,11 @@ varying vec2 UVY;
 varying vec2 UVZ;
 
 const float PHI = 1.61803398874989484820459;  // Φ = Golden Ratio   
+const float limit_table[16] =
+ {0.0625, 0.5625, 0.1825, 0.6825,
+  0.8125, 0.3125, 0.9375, 0.4375,
+  0.25  , 0.75  , 0.125 , 0.625 ,
+	1.0   , 0.5   , 0.875 , 0.375 };
 
 float gold_noise(in vec2 xy, in float seed){
        return fract(tan(distance(xy*PHI, xy)*seed)*xy.x);
@@ -102,43 +107,8 @@ void fragment() {
     float tp_limit = 0.0;
  
     if (x < 8) {
-		
-        if (index == 0) limit = 0.0625;
-        if (index == 1) limit = 0.5625;
-        if (index == 2) limit = 0.1875;
-        if (index == 3) limit = 0.6875;
-        if (index == 4) limit = 0.8125;
-        if (index == 5) limit = 0.3125;
-        if (index == 6) limit = 0.9375;
-        if (index == 7) limit = 0.4375;
-        if (index == 8) limit = 0.25;
-        if (index == 9) limit = 0.75;
-        if (index == 10) limit = 0.125;
-        if (index == 11) limit = 0.625;
-        if (index == 12) limit = 1.0;
-        if (index == 13) limit = 0.5;
-        if (index == 14) limit = 0.875;
-        if (index == 15) limit = 0.375;
-		
-        if (index == 0) tp_limit = 0.0;
-        if (index == 1) tp_limit = 1.0;
-        if (index == 2) tp_limit = 0.0;
-        if (index == 3) tp_limit = 1.0;
-		
-        if (index == 4) tp_limit = 1.0;
-        if (index == 5) tp_limit = 1.0;
-        if (index == 6) tp_limit = 1.0;
-        if (index == 7) tp_limit = 1.0;
-		
-        if (index == 8) tp_limit = 0.0;
-        if (index == 9) tp_limit = 1.0;
-        if (index == 10) tp_limit = 0.0;
-        if (index == 11) tp_limit = 1.0;
-		
-        if (index == 12) tp_limit = 1.0;
-        if (index == 13) tp_limit = 1.0;
-        if (index == 14) tp_limit = 1.0;
-        if (index == 15) tp_limit = 1.0;
+        limit = limit_table[index];
+        tp_limit = float((index & 5) != 0);
     }
 	if (limit <= spawn_ratio()){
 		discard;

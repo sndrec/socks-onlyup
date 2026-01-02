@@ -2,6 +2,7 @@
 
 [resource]
 vertex_color_use_as_albedo = true
+vertex_color_is_srgb = true
 clearcoat = 0.0
 clearcoat_roughness = 1.0
 detail_enabled = true

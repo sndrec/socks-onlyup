@@ -181,7 +181,7 @@ var unfocused := false
 
 func _notification(what):
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		SOGlobal.save_data.save_game()
+		#SOGlobal.save_data.save_game()
 		get_tree().quit()
 	if what == NOTIFICATION_WM_WINDOW_FOCUS_OUT: 
 		unfocused = true

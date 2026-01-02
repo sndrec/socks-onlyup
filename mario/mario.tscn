@@ -96,6 +96,17 @@ text = "40:02.394"
 label_settings = SubResource("LabelSettings_6h3om")
 horizontal_alignment = 1
 
+[node name="RespawnTimer" type="Label" parent="."]
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.985
+offset_top = -0.22500038
+grow_horizontal = 2
+grow_vertical = 2
+label_settings = SubResource("LabelSettings_6h3om")
+horizontal_alignment = 1
+vertical_alignment = 2
+
 [node name="SpawnLineCast" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 enabled = false
@@ -137,6 +148,22 @@ offset_top = 60.0
 offset_right = -0.428024
 offset_bottom = 70.24
 text = "@*0"
+label_settings = SubResource("LabelSettings_46e2l")
+
+[node name="ElevationCounter" type="Label" parent="."]
+texture_filter = 1
+texture_repeat = 1
+material = ExtResource("4_cha25")
+anchors_preset = -1
+anchor_left = 0.027
+anchor_top = 0.05
+anchor_right = 0.138
+anchor_bottom = 0.108
+offset_left = -0.28027725
+offset_top = 119.600006
+offset_right = 105.93419
+offset_bottom = 158.58398
+text = "67m"
 label_settings = SubResource("LabelSettings_46e2l")
 
 [node name="PowerDisp" type="TextureRect" parent="."]
