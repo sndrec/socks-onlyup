@@ -99,7 +99,7 @@ func _respawn():
 func _on_area_3d_area_entered(area: Area3D):
 	if !visible:
 		return
-	if area.get_parent() is SM64Mario:
+	if area.get_parent() is LibSM64Mario:
 		area.get_parent()._get_power_star(star_id)
 		_collect()
 	else:

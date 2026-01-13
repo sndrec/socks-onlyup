@@ -1,13 +1,13 @@
-[gd_scene load_steps=16 format=3 uid="uid://b3sy802m6p2s1"]
+[gd_scene load_steps=15 format=3 uid="uid://b3sy802m6p2s1"]
 
 [ext_resource type="Script" uid="uid://cwmh2o71jyj7y" path="res://scene_base.gd" id="1_kek77"]
 [ext_resource type="Material" uid="uid://bbflq1vcknt2x" path="res://mario/sky_material.tres" id="2_4c57u"]
 [ext_resource type="Shader" uid="uid://ctqb4hsew8lxt" path="res://death_plane.gdshader" id="3_efxa6"]
-[ext_resource type="Script" uid="uid://cs8ofdk2ib650" path="res://addons/libsm64-godot/components/sm64_surface_properties_component.gd" id="4_dg77c"]
-[ext_resource type="Script" uid="uid://13uun38swcuo" path="res://addons/libsm64-godot/handlers/sm64_static_surfaces_handler.gd" id="5_ycdy4"]
-[ext_resource type="Script" uid="uid://5kieivn8ehwn" path="res://addons/libsm64-godot/handlers/sm64_surface_objects_handler.gd" id="6_w48qg"]
+[ext_resource type="Script" uid="uid://bbq30kpxivduk" path="res://addons/libsm64_godot/handlers/libsm64_static_surfaces_handler.gd" id="5_kek77"]
+[ext_resource type="Script" uid="uid://d0ak76u87aww3" path="res://addons/libsm64_godot/handlers/libsm64_surface_objects_handler.gd" id="6_4c57u"]
 [ext_resource type="Material" uid="uid://bid7sibxqlpii" path="res://mario/block_material.tres" id="7_vivmo"]
 [ext_resource type="PackedScene" uid="uid://cg8l4angkunu5" path="res://mario/mario.tscn" id="8_2cqfq"]
+[ext_resource type="Script" uid="uid://b4n6vr1utqly6" path="res://addons/libsm64_godot/libsm64_mario/libsm64_mario.gd" id="8_kek77"]
 [ext_resource type="PackedScene" uid="uid://d3lw47lfofslh" path="res://mario/power_star.tscn" id="9_yaehf"]
 
 [sub_resource type="Sky" id="Sky_6d86y"]
@@ -39,9 +39,6 @@ size = Vector2(1024, 1024)
 subdivide_width = 16
 subdivide_depth = 16
 
-[sub_resource type="SM64SurfaceProperties" id="SM64SurfaceProperties_hhvd1"]
-terrain_type = 1
-
 [sub_resource type="BoxMesh" id="BoxMesh_37666"]
 material = ExtResource("7_vivmo")
 size = Vector3(32, 1, 32)
@@ -64,14 +61,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -48, 0)
 mesh = SubResource("PlaneMesh_pvrxd")
 
 [node name="SM64SurfacePropertiesComponent" type="Node" parent="MeshInstance3D"]
-script = ExtResource("4_dg77c")
-surface_properties = SubResource("SM64SurfaceProperties_hhvd1")
 
 [node name="SM64StaticSurfaceHandler" type="Node" parent="."]
-script = ExtResource("5_ycdy4")
+script = ExtResource("5_kek77")
 
 [node name="SM64SurfaceObjectsHandler" type="Node" parent="."]
-script = ExtResource("6_w48qg")
+script = ExtResource("6_4c57u")
 
 [node name="OnlyUpLevel" type="Node3D" parent="."]
 
@@ -83,10 +78,9 @@ mesh = SubResource("BoxMesh_37666")
 skeleton = NodePath("../..")
 
 [node name="SM64SurfacePropertiesComponent" type="Node" parent="OnlyUpLevel/MeshInstance3D2"]
-script = ExtResource("4_dg77c")
-surface_properties = SubResource("SM64SurfaceProperties_hhvd1")
 
 [node name="Mario" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("8_2cqfq")]
+script = ExtResource("8_kek77")
 camera = NodePath("../Camera3D")
 
 [node name="PowerStar" parent="." instance=ExtResource("9_yaehf")]
