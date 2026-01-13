@@ -1,16 +1,19 @@
-[gd_scene load_steps=20 format=3 uid="uid://cg8l4angkunu5"]
+[gd_scene load_steps=23 format=3 uid="uid://cg8l4angkunu5"]
 
-[ext_resource type="Script" uid="uid://b06tba8jwus0a" path="res://addons/libsm64-godot/mario/sm64_mario.gd" id="1_vy05d"]
+[ext_resource type="Script" uid="uid://b4n6vr1utqly6" path="res://addons/libsm64_godot/libsm64_mario/libsm64_mario.gd" id="1_vy05d"]
 [ext_resource type="FontFile" uid="uid://c25d003g01x4h" path="res://mario/Mario64.ttf" id="2_3w352"]
 [ext_resource type="Texture2D" uid="uid://dhp0h2p7egisy" path="res://mario/shadow.png" id="3_cdwnk"]
 [ext_resource type="Material" uid="uid://bl762yb1x7p1q" path="res://mario/ui_text.tres" id="4_cha25"]
+[ext_resource type="Script" uid="uid://bv8hwa8axtb2n" path="res://mario/respawn_timer.gd" id="4_op52n"]
 [ext_resource type="FontFile" uid="uid://d0frtdpt4mmba" path="res://mario/ui_lettering.png" id="4_p843u"]
 [ext_resource type="Shader" uid="uid://dkr305k56aqxu" path="res://mario/power_ui.gdshader" id="5_cfhc3"]
 [ext_resource type="Texture2D" uid="uid://dyms68ekl5gio" path="res://mario/checkerboard.png" id="6_0vgae"]
+[ext_resource type="Script" uid="uid://bm55md84xmrfc" path="res://mario/elevation_counter.gd" id="6_nh0yd"]
 [ext_resource type="Texture2D" uid="uid://bb6iaa2qu36la" path="res://mario/power_head_mask.png" id="7_mmu4j"]
 [ext_resource type="Texture2D" uid="uid://cen8uruthosia" path="res://mario/power_text_mask.png" id="8_xynuk"]
 [ext_resource type="Texture2D" uid="uid://csm3y75usd5u5" path="res://mario/health_slices.png" id="9_0e7ou"]
 [ext_resource type="Shader" uid="uid://dm2r3fx38qq7f" path="res://mario/health_slices.gdshader" id="9_03fle"]
+[ext_resource type="Script" uid="uid://b22311nyuu36" path="res://mario/power_disp_color.gd" id="10_13o4e"]
 
 [sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_a3013"]
 
@@ -78,8 +81,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.556764, 0)
 shape = SubResource("CylinderShape3D_55yaj")
 
 [node name="Decal" type="Decal" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -15.995, 0)
-size = Vector3(1, 32, 1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -15.794999, 0)
+size = Vector3(1, 32.4, 1)
 texture_albedo = ExtResource("3_cdwnk")
 normal_fade = 0.5
 upper_fade = 1e-05
@@ -103,9 +106,11 @@ anchor_bottom = 0.985
 offset_top = -0.22500038
 grow_horizontal = 2
 grow_vertical = 2
+text = "Keep holding to respawn... 6.7"
 label_settings = SubResource("LabelSettings_6h3om")
 horizontal_alignment = 1
 vertical_alignment = 2
+script = ExtResource("4_op52n")
 
 [node name="SpawnLineCast" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
@@ -165,6 +170,7 @@ offset_right = 105.93419
 offset_bottom = 158.58398
 text = "67m"
 label_settings = SubResource("LabelSettings_46e2l")
+script = ExtResource("6_nh0yd")
 
 [node name="PowerDisp" type="TextureRect" parent="."]
 material = SubResource("ShaderMaterial_7qgrv")
@@ -182,6 +188,7 @@ size_flags_vertical = 0
 texture = ExtResource("7_mmu4j")
 expand_mode = 2
 stretch_mode = 4
+script = ExtResource("10_13o4e")
 
 [node name="PowerText" type="TextureRect" parent="PowerDisp"]
 material = SubResource("ShaderMaterial_ywjq4")
@@ -214,3 +221,5 @@ size_flags_vertical = 0
 texture = ExtResource("9_0e7ou")
 expand_mode = 2
 stretch_mode = 4
+
+[connection signal="health_wedges_changed" from="." to="PowerDisp" method="_on_mario_health_wedges_changed"]
