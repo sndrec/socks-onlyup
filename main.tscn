@@ -1,10 +1,11 @@
-[gd_scene load_steps=14 format=3 uid="uid://b3sy802m6p2s1"]
+[gd_scene load_steps=16 format=3 uid="uid://b3sy802m6p2s1"]
 
 [ext_resource type="Script" uid="uid://cwmh2o71jyj7y" path="res://scene_base.gd" id="1_kek77"]
 [ext_resource type="Material" uid="uid://bbflq1vcknt2x" path="res://mario/sky_material.tres" id="2_4c57u"]
 [ext_resource type="Shader" uid="uid://ctqb4hsew8lxt" path="res://death_plane.gdshader" id="3_efxa6"]
 [ext_resource type="Script" uid="uid://bbq30kpxivduk" path="res://addons/libsm64_godot/handlers/libsm64_static_surfaces_handler.gd" id="5_kek77"]
 [ext_resource type="Script" uid="uid://d0ak76u87aww3" path="res://addons/libsm64_godot/handlers/libsm64_surface_objects_handler.gd" id="6_4c57u"]
+[ext_resource type="Script" uid="uid://bl0pfpmowxtu1" path="res://addons/libsm64_godot/components/libsm64_surface_properties_component.gd" id="7_kek77"]
 [ext_resource type="Material" uid="uid://bid7sibxqlpii" path="res://mario/block_material.tres" id="7_vivmo"]
 [ext_resource type="PackedScene" uid="uid://cg8l4angkunu5" path="res://mario/mario.tscn" id="8_2cqfq"]
 [ext_resource type="PackedScene" uid="uid://d3lw47lfofslh" path="res://mario/power_star.tscn" id="9_yaehf"]
@@ -42,6 +43,8 @@ subdivide_depth = 16
 material = ExtResource("7_vivmo")
 size = Vector3(32, 1, 32)
 
+[sub_resource type="LibSM64SurfaceProperties" id="LibSM64SurfaceProperties_4c57u"]
+
 [node name="Node3D" type="Node3D"]
 script = ExtResource("1_kek77")
 
@@ -77,6 +80,8 @@ mesh = SubResource("BoxMesh_37666")
 skeleton = NodePath("../..")
 
 [node name="SM64SurfacePropertiesComponent" type="Node" parent="OnlyUpLevel/MeshInstance3D2"]
+script = ExtResource("7_kek77")
+surface_properties = SubResource("LibSM64SurfaceProperties_4c57u")
 
 [node name="Mario" parent="." node_paths=PackedStringArray("camera") instance=ExtResource("8_2cqfq")]
 camera = NodePath("../Camera3D")

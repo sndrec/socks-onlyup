@@ -1,6 +1,6 @@
 [gd_scene load_steps=23 format=3 uid="uid://cg8l4angkunu5"]
 
-[ext_resource type="Script" uid="uid://b4n6vr1utqly6" path="res://addons/libsm64_godot/libsm64_mario/libsm64_mario.gd" id="1_vy05d"]
+[ext_resource type="Script" uid="uid://c40gd2jyr50o7" path="res://mario/mario.gd" id="1_op52n"]
 [ext_resource type="FontFile" uid="uid://c25d003g01x4h" path="res://mario/Mario64.ttf" id="2_3w352"]
 [ext_resource type="Texture2D" uid="uid://dhp0h2p7egisy" path="res://mario/shadow.png" id="3_cdwnk"]
 [ext_resource type="Material" uid="uid://bl762yb1x7p1q" path="res://mario/ui_text.tres" id="4_cha25"]
@@ -65,7 +65,14 @@ shader = ExtResource("9_03fle")
 shader_parameter/wedges = 8.0
 
 [node name="Mario" type="Node3D"]
-script = ExtResource("1_vy05d")
+script = ExtResource("1_op52n")
+mario_inputs_stick_left = &"mario_stick_left"
+mario_inputs_stick_right = &"mario_stick_right"
+mario_inputs_stick_up = &"mario_stick_up"
+mario_inputs_stick_down = &"mario_stick_down"
+mario_inputs_button_a = &"mario_a"
+mario_inputs_button_b = &"mario_b"
+mario_inputs_button_z = &"mario_z"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 stream = SubResource("AudioStreamPolyphonic_a3013")
@@ -100,13 +107,13 @@ label_settings = SubResource("LabelSettings_6h3om")
 horizontal_alignment = 1
 
 [node name="RespawnTimer" type="Label" parent="."]
+process_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
 anchor_bottom = 0.985
 offset_top = -0.22500038
 grow_horizontal = 2
 grow_vertical = 2
-text = "Keep holding to respawn... 6.7"
 label_settings = SubResource("LabelSettings_6h3om")
 horizontal_alignment = 1
 vertical_alignment = 2

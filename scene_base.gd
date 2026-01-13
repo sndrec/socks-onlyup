@@ -1,6 +1,6 @@
 extends Node3D
 
-@onready var sm_64_mario := $Mario as LibSM64Mario
+@onready var sm_64_mario := $Mario
 @onready var sm_64_static_surface_handler: LibSM64StaticSurfacesHandler = $SM64StaticSurfaceHandler
 @onready var sm_64_surface_objects_handler: LibSM64SurfaceObjectsHandler = $SM64SurfaceObjectsHandler
 @onready var world_environment := $WorldEnvironment as WorldEnvironment
@@ -20,11 +20,18 @@ func _create_mario_world(useSeed = str(randi())) -> void:
 
 	if _is_libsm64_init:
 		LibSM64Global.terminate()
+		
+	for child in get_children():
+		if child is Camera3D:
+			sm_64_mario.camera = child
+			break
 
 	_is_libsm64_init = LibSM64Global.init()
 	
 	sm_64_static_surface_handler.load_static_surfaces()
 	sm_64_surface_objects_handler.load_all_surface_objects()
+	
+
 	
 	sm_64_mario.create()
 	SOGlobal.level_start_time = Time.get_ticks_msec()

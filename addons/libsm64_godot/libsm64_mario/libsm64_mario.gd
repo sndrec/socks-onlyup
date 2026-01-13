@@ -1,26 +1,31 @@
 @icon("res://addons/libsm64_godot/libsm64_mario/libsm64_mario.svg")
 class_name LibSM64Mario
 extends Node3D
+## Node that instances a Mario into a scenario and provides an interface to control it.
+##
+## This class exposes Mario's state, actions, and interactions within the [code]libsm64[/code] world.
+## It includes methods for creating, deleting, teleporting, and controlling Mario,
+## as well as handling his health, velocity, and special abilities.
 
-@onready var audio_stream_player = $AudioStreamPlayer
-@onready var mario_collision := $MarioCollision as Area3D
-@onready var collision_cylinder := $MarioCollision/CollisionCylinder.shape as CylinderShape3D
 
-## Node that instances a Mario into a scenario
-
-## Value that represents Mario being at full health
+## Value that represents Mario being at full health.
 const FULL_HEALTH = 0x0880
-## Value that represents one health wedge
+## Value that represents one health wedge.
 const HEALTH_WEDGE = 0x0100
 
 
+## Emitted when Mario's action changes.
 signal action_changed(action: LibSM64.ActionFlags)
+## Emitted when Mario's flags change.
 signal flags_changed(flags: LibSM64.MarioFlags)
+## Emitted when Mario's particle flags change.
 signal particle_flags_changed(particle_flags: LibSM64.ParticleFlags)
+## Emitted when Mario's health changes.
 signal health_changed(health: int)
+## Emitted when Mario's health wedges change.
 signal health_wedges_changed(health_wedges: int)
 
-## Camera instance that follows Mario
+## Camera instance that follows Mario. Necessary for resolving Mario's inputs.
 @export var camera: Camera3D
 
 ## if [code]true[/code], linearly interpolate Mario and transform
@@ -29,24 +34,23 @@ signal health_wedges_changed(health_wedges: int)
 @export var interpolate := true
 
 @export_group("Mario Inputs Actions", "mario_inputs_")
-## Action equivalent to pushing the joystick to the left
-@export var mario_inputs_stick_left := &"mario_stick_left"
-## Action equivalent to pushing the joystick to the right
-@export var mario_inputs_stick_right := &"mario_stick_right"
-## Action equivalent to pushing the joystick upwards
-@export var mario_inputs_stick_up := &"mario_stick_up"
-## Action equivalent to pushing the joystick downwards
-@export var mario_inputs_stick_down := &"mario_stick_down"
-## Action equivalent to pushing the A button
-@export var mario_inputs_button_a := &"mario_a"
-## Action equivalent to pushing the B button
-@export var mario_inputs_button_b := &"mario_b"
-## Action equivalent to pushing the Z button
-@export var mario_inputs_button_z := &"mario_z"
-
+## Action equivalent to pushing the joystick to the left.
+@export var mario_inputs_stick_left := &"libsm64_mario_inputs_stick_left"
+## Action equivalent to pushing the joystick to the right.
+@export var mario_inputs_stick_right := &"libsm64_mario_inputs_stick_right"
+## Action equivalent to pushing the joystick upwards.
+@export var mario_inputs_stick_up := &"libsm64_mario_inputs_stick_up"
+## Action equivalent to pushing the joystick downwards.
+@export var mario_inputs_stick_down := &"libsm64_mario_inputs_stick_down"
+## Action equivalent to pushing the A button.
+@export var mario_inputs_button_a := &"libsm64_mario_inputs_button_a"
+## Action equivalent to pushing the B button.
+@export var mario_inputs_button_b := &"libsm64_mario_inputs_button_b"
+## Action equivalent to pushing the Z button.
+@export var mario_inputs_button_z := &"libsm64_mario_inputs_button_z"
 
 var _id := -1
-## Mario's internal [code]libsm64[/code] ID
+## Mario's internal [code]libsm64[/code] ID. If [code]-1[/code], Mario hasn't been created.
 var id: int:
 	get:
 		return _id
@@ -56,7 +60,7 @@ var _action := LibSM64.ActionFlags.ACT_UNINITIALIZED:
 		if value != _action:
 			_action = value
 			action_changed.emit(_action)
-## Mario's action flags
+## The current action state of Mario. This determines his animation and behavior state (e.g., jumping, running, swimming).
 var action: LibSM64.ActionFlags:
 	get:
 		return _action
@@ -66,17 +70,39 @@ var action: LibSM64.ActionFlags:
 		LibSM64.set_mario_action(_id, value)
 		_action = value
 
-## Mario's action as StringName
+## The current action state of Mario as a [StringName].
 var action_name: StringName:
 	get:
 		return _to_action_name(_action)
+
+var _anim_id := LibSM64.MarioAnimID.MARIO_ANIM_SLOW_LEDGE_GRAB
+## The ID of the current animation being played for Mario. This corresponds to specific animations defined in [enum LibSM64.MarioAnimID].
+var anim_id: LibSM64.MarioAnimID:
+	get:
+		return _anim_id
+	set(value):
+		if _id < 0:
+			return
+		LibSM64.set_mario_animation(_id, value)
+		_anim_id = value
+
+var _anim_frame := 0
+## The current frame of Mario's animation. This value is used to track the progress of the current animation sequence.
+var anim_frame: int:
+	get:
+		return _anim_frame
+	set(value):
+		if _id < 0:
+			return
+		LibSM64.set_mario_anim_frame(_id, value)
+		_anim_frame = value
 
 var _flags := 0 as LibSM64.MarioFlags:
 	set(value):
 		if value != _flags:
 			_flags = value
 			flags_changed.emit(_flags)
-## Mario's state flags
+## Various status flags that affect Mario's state and behavior (e.g., cap status, metal state, invincibility).
 var flags: LibSM64.MarioFlags:
 	get:
 		return _flags
@@ -91,13 +117,13 @@ var _particle_flags := 0 as LibSM64.ParticleFlags:
 		if value != _particle_flags:
 			_particle_flags = value
 			particle_flags_changed.emit(_particle_flags)
-## Mario's particle flags
+## Flags indicating which particles should be spawned around Mario (e.g., dust, bubbles, sparkles).
 var particle_flags: LibSM64.ParticleFlags:
 	get:
 		return _particle_flags
 
 var _velocity := Vector3()
-## Mario's velocity in the libsm64 world
+## Mario's current velocity vector, indicating both the direction and speed of his movement.
 var velocity: Vector3:
 	get:
 		return _velocity
@@ -110,11 +136,25 @@ var velocity: Vector3:
 			_mario_interpolator.mario_state_current.velocity = _velocity
 			_mario_interpolator.mario_state_previous.velocity = _velocity
 
+var _forward_velocity := 0.0
+## Mario's current forward velocity (in meters per second). This value indicates how fast Mario is moving in the direction he is facing.
+var forward_velocity: float:
+	get:
+		return _forward_velocity
+	set(value):
+		if _id < 0:
+			return
+		LibSM64.set_mario_forward_velocity(_id, value)
+		_forward_velocity = value
+		if _mario_interpolator.mario_state_current:
+			_mario_interpolator.mario_state_current.forward_velocity = _forward_velocity
+			_mario_interpolator.mario_state_previous.forward_velocity = _forward_velocity
+
 var _face_angle := 0.0:
 	set(value):
 		global_rotation.y = value
 		_face_angle = value
-## Mario's facing angle in radians
+## The angle (in radians) that Mario is facing in the horizontal plane. [code]0.0[/code] points along the negative X axis.
 var face_angle: float:
 	get:
 		return _face_angle
@@ -133,7 +173,7 @@ var _health := FULL_HEALTH:
 			_health = value
 			health_changed.emit(_health)
 			health_wedges_changed.emit(health_wedges)
-## Mario's health (2 bytes, upper byte is the number of health wedges, lower byte portion of next wedge)
+## Mario's current health value. This is a 16 bit value: upper byte is the number of health wedges; the lower byte is the portion of next wedge.
 var health: int:
 	get:
 		return _health
@@ -143,7 +183,7 @@ var health: int:
 		LibSM64.set_mario_health(_id, value)
 		_health = value
 
-## Mario's amount of health wedges
+## Mario's current health value in health wedges. This is a number between [code]0[/code] and [code]8[/code].
 var health_wedges: int:
 	get:
 		return _health >> 0x8 if _health > 0 else 0x0
@@ -155,7 +195,7 @@ var health_wedges: int:
 		_health = new_health
 
 var _invincibility_time := 0.0
-## Mario's invincibility time in seconds
+## The remaining time (in seconds) of Mario's invincibility state.
 var invincibility_time: float:
 	get:
 		return _invincibility_time
@@ -168,21 +208,27 @@ var invincibility_time: float:
 			_mario_interpolator.mario_state_current.invincibility_time = _invincibility_time
 			_mario_interpolator.mario_state_previous.invincibility_time = _invincibility_time
 
-## Mario's water level
-var water_level := -100000.0 / LibSM64.scale_factor:
+var _water_level_in_libsm64 := -100000
+## The height of the water level in the [code]libsm64[/code] world for this Mario instance. If Mario is below this level, he will be considered swimming.
+var water_level: float:
+	get:
+		return float(_water_level_in_libsm64) / LibSM64.scale_factor
 	set(value):
 		if _id < 0:
 			return
 		LibSM64.set_mario_water_level(_id, value)
-		water_level = value
+		_water_level_in_libsm64 = int(value * LibSM64.scale_factor)
 
-## Mario's gas level
-var gas_level := -100000.0 / LibSM64.scale_factor:
+var _gas_level_in_libsm64 := -100000
+## The height of the gas level in the [code]libsm64[/code] world for this Mario instance. If Mario is below this level, he will start coughing and take damage, eventually choking to death.
+var gas_level: float:
+	get:
+		return float(_gas_level_in_libsm64) / LibSM64.scale_factor
 	set(value):
 		if _id < 0:
 			return
 		LibSM64.set_mario_gas_level(_id, value)
-		gas_level = value
+		_gas_level_in_libsm64 = int(value * LibSM64.scale_factor)
 
 var _mesh_instance: MeshInstance3D
 var _mesh: ArrayMesh
@@ -198,26 +244,9 @@ var _time_since_last_tick := 0.0
 var _last_tick_usec := Time.get_ticks_usec()
 var _reset_interpolation_next_tick := false
 
-var _cam_rotation := 0.0
-var _cam_rotation_target := 0.0
-var _cam_zoom := 1
-var _cam_tilt := 0.0
-var _cam_height := 0.0
-var _cam_target_height := 0.0
-var _cam_dist := 0.0
-var _cam_target := Vector3(0, 0, 0)
-var _cam_dir := Vector3(0, 0, 1)
-var _cam_target_dist := 0.0
-
-@onready var level_timer := $LevelTimer as Label
-@onready var coin_counter = $CoinCounter
-@onready var power_disp = $PowerDisp
-@onready var health_wedges_disp = $PowerDisp/HealthWedges
-
-var _paused : bool = false
-
 
 func _ready() -> void:
+	## Mario's mesh vertices are in global space.
 	_mesh_instance = MeshInstance3D.new()
 	add_child(_mesh_instance)
 	_mesh_instance.top_level = true
@@ -227,81 +256,18 @@ func _ready() -> void:
 	_mesh = ArrayMesh.new()
 	_mesh_instance.mesh = _mesh
 
-	SOGlobal.current_mario = self
 
 func _process(delta: float) -> void:
 	if _id < 0:
 		return
 
-	if SOGlobal.unfocused:
-		return
-	if position.y <= -32:
-		if checkpoint_flag and is_instance_valid(checkpoint_flag):
-			_restore_mario_to_checkpoint()
-		else: if !needs_respawning:
-			needs_respawning = true
-			_respawn_mario()
-
-
-	level_timer.visible = true
-	var timer_seconds : float = float(finish_time - start_time) * 0.001
-	if finish_time < 0:
-		timer_seconds = float(Time.get_ticks_msec() - start_time) * 0.001
-	level_timer.text = "%02d:%02d.%03d" % [timer_seconds/60.0, fmod(timer_seconds, 60.0), fmod(timer_seconds * 1000, 1000.0)]
-
-	visible = true
-
-	if _paused:
-		return
-
-	#DebugDraw2D.set_text("ACTION", LibSM64.ACT_to_action_name(_action))
-
-	time_since_start += delta
-
-	if Input.is_action_just_pressed("start_button"):
-		var pause_menu = preload("res://mario/mario_pause_menu.tscn").instantiate()
-		SOGlobal.add_child(pause_menu)
-		_paused = true
-		return
-
-	var camera_input : Vector2 = Input.get_vector("cam_stick_left", "cam_stick_right", "cam_stick_up", "cam_stick_down")
-	if SOGlobal.flip_x:
-		camera_input.x *= -1
-
-	var time_minus_start = Time.get_ticks_msec() - SOGlobal.level_start_time
-
-	mario_collision.position.y = 0.25
-	collision_cylinder.radius = 0.5
-	collision_cylinder.height = 1.75
-
-	#print(action & LibSM64.ACT_FLAG_STATIONARY > 0)
-
-	if action & LibSM64.ACT_FLAG_STATIONARY > 0:
-		if Input.is_action_just_pressed("dpad_up"):
-			_create_checkpoint()
-
-	match action:
-		LibSM64.ACT_SPAWN_SPIN_AIRBORNE:
-			global_position = snapped(global_position, Vector3(0.5, 0, 0.5))
-			#teleport(global_position)
-			_velocity = _velocity * Vector3(0, 1, 0)
-		LibSM64.ACT_GROUND_POUND:
-			mario_collision.position.y = -0.5
-			collision_cylinder.height = 2.0
-			collision_cylinder.radius = 1.25
-
-	if Input.is_action_just_pressed("dpad_down") and checkpoint_flag and is_instance_valid(checkpoint_flag):
-		_restore_mario_to_checkpoint()
-
-
-	if Time.get_ticks_msec() > gravity_set_time + 10000:
-		gravity_add = 0
-
-	if gravity_add != 0:
-		velocity += Vector3(0, gravity_add * delta, 0)
-
 	var lerp_t = (Time.get_ticks_usec() - _last_tick_usec) / (LibSM64.tick_delta_time * 1000000.0)
 
+	_update_lerped_members_from_mario_state(lerp_t)
+	_update_mesh(lerp_t)
+
+
+func _update_lerped_members_from_mario_state(lerp_t: float) -> void:
 	var mario_state: LibSM64MarioState
 	if interpolate:
 		mario_state = _mario_interpolator.interpolate_mario_state(lerp_t)
@@ -310,9 +276,12 @@ func _process(delta: float) -> void:
 
 	global_position = mario_state.position
 	_velocity = mario_state.velocity
+	_forward_velocity = mario_state.forward_velocity
 	_face_angle = mario_state.face_angle
 	_invincibility_time = mario_state.invincibility_time
 
+
+func _update_mesh(lerp_t: float) -> void:
 	var material: StandardMaterial3D
 	match _flags & LibSM64.MARIO_SPECIAL_CAPS:
 		LibSM64.MARIO_VANISH_CAP :
@@ -330,34 +299,10 @@ func _process(delta: float) -> void:
 	else:
 		array_mesh_triangles = _mario_interpolator.array_mesh_triangles_current
 
-	if not array_mesh_triangles[ArrayMesh.ARRAY_VERTEX].is_empty():
+	if not array_mesh_triangles.is_empty() and not array_mesh_triangles[ArrayMesh.ARRAY_VERTEX].is_empty():
 		_mesh.clear_surfaces()
 		_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, array_mesh_triangles)
 		_mesh_instance.set_surface_override_material(0, material)
-
-	_calculate_gameplay_camera(delta)
-	var gameplay_camera_transform : Transform3D = camera.global_transform
-	if false and time_since_start <= 1.0:
-		var ratio : float = 1.0 - time_since_start
-		ratio = ease(ratio, -2)
-		camera.global_transform = camera.global_transform.interpolate_with(view_stage_transform, ratio)
-
-	RenderingServer.global_shader_parameter_set("aspect_ratio", get_window().size.x / get_window().size.y)
-	#DebugDraw2D.set_text("COIN COUNT", current_coin_count)
-	coin_counter.text = "$*" + str(current_coin_count)
-	health_wedges_disp.material.set_shader_parameter("wedges", health_wedges)
-	if hide_hud and !hide_hud_old:
-		level_timer.visible = false
-		coin_counter.visible = false
-		power_disp.visible = false
-
-	if !hide_hud and hide_hud_old:
-		level_timer.visible = true
-		coin_counter.visible = true
-		power_disp.visible = true
-
-	hide_hud_old = hide_hud
-	#DebugDraw3D.draw_sphere(position, 0.1, Color(1, 1, 1), delta)
 
 
 func _physics_process(delta):
@@ -369,15 +314,19 @@ func _physics_process(delta):
 		_tick()
 		_last_tick_usec = Time.get_ticks_usec()
 		_time_since_last_tick -= LibSM64.tick_delta_time
-
-		# Update the members that aren't interpolated
-		_health = _mario_interpolator.mario_state_current.health;
-		_action = _mario_interpolator.mario_state_current.action;
-		_flags = _mario_interpolator.mario_state_current.flags;
-		_particle_flags = _mario_interpolator.mario_state_current.particle_flags;
+		_update_non_lerped_members_from_mario_state()
 
 
-## Create Mario (requires initializing the libsm64 via the global_init function)
+func _update_non_lerped_members_from_mario_state() -> void:
+	_health = _mario_interpolator.mario_state_current.health
+	_action = _mario_interpolator.mario_state_current.action
+	_anim_id = _mario_interpolator.mario_state_current.anim_id
+	_anim_frame = _mario_interpolator.mario_state_current.anim_frame
+	_flags = _mario_interpolator.mario_state_current.flags
+	_particle_flags = _mario_interpolator.mario_state_current.particle_flags
+
+
+## Create Mario (requires initializing [code]libsm64[/code] via the [method LibSM64Global.init] method).
 func create() -> void:
 	if _id >= 0:
 		delete()
@@ -398,14 +347,13 @@ func create() -> void:
 
 	reset_interpolation()
 
-	if not _default_material.albedo_texture:
-		_default_material.albedo_texture = LibSM64Global.mario_texture
-		_wing_material.albedo_texture = LibSM64Global.mario_texture
-		_metal_material.albedo_texture = LibSM64Global.mario_texture
-		_vanish_material.albedo_texture = LibSM64Global.mario_texture
+	_default_material.next_pass.albedo_texture = LibSM64Global.mario_texture
+	_wing_material.next_pass.albedo_texture = LibSM64Global.mario_texture
+	_metal_material.next_pass.albedo_texture = LibSM64Global.mario_texture
+	_vanish_material.next_pass.albedo_texture = LibSM64Global.mario_texture
 
 
-## Delete mario inside the libsm64 world
+## Delete mario inside the [code]libsm64[/code] world.
 func delete() -> void:
 	if _id < 0:
 		return
@@ -413,7 +361,7 @@ func delete() -> void:
 	_id = -1
 
 
-## Teleport mario in the libsm64 world
+## Teleport mario in the [code]libsm64[/code] world.
 func teleport(to_global_position: Vector3) -> void:
 	if _id < 0:
 		return
@@ -424,7 +372,7 @@ func teleport(to_global_position: Vector3) -> void:
 	reset_interpolation()
 
 
-## Set angle of mario in the libsm64 world
+## Set angle of mario in the [code]libsm64[/code] world.
 func set_angle(to_global_rotation: Quaternion) -> void:
 	if _id < 0:
 		return
@@ -435,49 +383,42 @@ func set_angle(to_global_rotation: Quaternion) -> void:
 	reset_interpolation()
 
 
-## Set Mario's forward velocity in the libsm64 world
-func set_forward_velocity(velocity: float) -> void:
-	if _id < 0:
-		return
-	LibSM64.set_mario_forward_velocity(_id, velocity)
-
-
-## Make Mario take damage in amount of health wedges from a source position
+## Make Mario take damage in amount of health wedges from a source position.
 func take_damage(damage: int, subtype: int, source_position: Vector3) -> void:
 	if _id < 0:
 		return
 	LibSM64.mario_take_damage(_id, damage, subtype, source_position)
 
 
-## Heal Mario a specific amount of wedges
+## Heal Mario a specific amount of wedges.
 func heal(wedges: int) -> void:
 	if _id < 0:
 		return
 	LibSM64.mario_heal(_id, wedges)
 
 
-## Kill Mario
+## Kill Mario.
 func kill() -> void:
 	if _id < 0:
 		return
 	LibSM64.mario_kill(_id)
 
 
-## Equip special cap (see LibSM64.MarioFlags for values)
+## Equip special cap.
 func interact_cap(cap_flag: LibSM64.MarioFlags, cap_time := 0.0, play_music := true) -> void:
 	if _id < 0:
 		return
 	LibSM64.mario_interact_cap(_id, cap_flag, cap_time, play_music)
 
 
-## Extend current special cap time
+## Extend current special cap time.
 func extend_cap(cap_time: float) -> void:
 	if _id < 0:
 		return
 	LibSM64.mario_extend_cap(_id, cap_time)
 
 
-## Reset interpolation next tick
+## Reset interpolation next tick.
 func reset_interpolation() -> void:
 	_reset_interpolation_next_tick = true
 
@@ -485,188 +426,16 @@ func reset_interpolation() -> void:
 func _make_mario_inputs() -> LibSM64MarioInputs:
 	var mario_inputs := LibSM64MarioInputs.new()
 
-	var pl_input := PlayerInput.from_input()
+	mario_inputs.stick = Input.get_vector(mario_inputs_stick_left, mario_inputs_stick_right, mario_inputs_stick_up, mario_inputs_stick_down)
 
-	mario_inputs.stick = Vector2(pl_input.JoyXAxis, pl_input.JoyYAxis)
-	if mario_inputs.stick.length() > 1.0:
-		mario_inputs.stick = mario_inputs.stick.normalized()
-	#DebugDraw2D.set_text("INPUT", mario_inputs.stick)
-
-	var look_direction := Vector2(0, 1).rotated(-_cam_rotation)
-	mario_inputs.cam_look = Vector2(look_direction.x, look_direction.y)
-	if action == LibSM64.ACT_STAR_DANCE_NO_EXIT or action == LibSM64.ACT_FALL_AFTER_STAR_GRAB or action == LibSM64.ACT_STAR_DANCE_EXIT:
-		mario_inputs.cam_look *= -1
+	var look_direction := camera.global_transform.basis.z
+	mario_inputs.cam_look = Vector2(look_direction.x, look_direction.z)
 
 	mario_inputs.button_a = Input.is_action_pressed(mario_inputs_button_a)
 	mario_inputs.button_b = Input.is_action_pressed(mario_inputs_button_b)
 	mario_inputs.button_z = Input.is_action_pressed(mario_inputs_button_z)
 
 	return mario_inputs
-
-
-#_cam_rotation - int
-#_cam_zoom - int
-#_cam_tilt - float
-#_cam_target - vector
-#_cam_target_dist - float
-var finish_time : float = -1.0
-var current_coin_count : int = 0
-
-func _get_power_star(in_star_id : String) -> void:
-	finish_time = Time.get_ticks_msec()
-	var time_in_seconds : float = float(finish_time - start_time) * 0.001
-	action = LibSM64.ACT_FALL_AFTER_STAR_GRAB
-	audio_stream_player.play()
-	var saysound_playback : AudioStreamPlaybackPolyphonic = audio_stream_player.get_stream_playback()
-	saysound_playback.play_stream(preload("res://mario/enter_painting.WAV"), 0, -8, 1.0)
-	await get_tree().create_timer(0.5).timeout
-	saysound_playback.play_stream(preload("res://mario/star_get_socks.ogg"), 0, 0, 1.0)
-	#action = LibSM64.ACT_FALL_AFTER_STAR_GRAB
-	set_angle(Quaternion.from_euler(camera.position - position).normalized())
-	await get_tree().create_timer(1.2).timeout
-	saysound_playback.play_stream(preload("res://mario/here_we_go.wav"), 0, 10, 1.0)
-
-var start_time := 0.0
-
-func _respawn_mario() -> void:
-	for block:LevelBlock in SOGlobal.level_meshes:
-		block._reset_block()
-	await get_tree().create_timer(0.05).timeout
-	needs_respawning = false
-	position = Vector3(0, 6, 0)
-	current_coin_count = 0
-	var cant_spawn = true
-	var iter : int = 0
-	var spawn_random := RandomNumberGenerator.new()
-	spawn_random.seed = hash("le spawn seed")
-	var dist = 1.0
-	teleport(position)
-	time_since_start = 0
-	num_checkpoints_used = 0
-	_cam_target_height = position.y
-	health_wedges = 8
-	_velocity = Vector3.ZERO
-	_cam_rotation_target = deg_to_rad(SOGlobal.start_angle)
-	_cam_zoom = 1
-	action = LibSM64.ACT_SPAWN_SPIN_AIRBORNE
-	start_time = Time.get_ticks_msec()
-	finish_time = -1.0
-	if checkpoint_flag and is_instance_valid(checkpoint_flag):
-		checkpoint_flag.queue_free()
-	checkpoint_pos = position
-	checkpoint_facing = face_angle
-	SOGlobal.play_sound(preload("res://mario/enter_painting.WAV"))
-	for child in SOGlobal.get_children():
-		if child is PowerStar:
-			child._respawn()
-		if child is Coin:
-			child._respawn()
-		if child is CorkBox:
-			child._reset()
-
-var checkpoint_pos : Vector3 = Vector3.ZERO
-var checkpoint_facing : float = 0
-var checkpoint_flag : Node3D
-
-func smin(a : float, b : float, k : float) -> float:
-	var h : float = clampf(0.5 + 0.5*(a-b)/k, 0.0, 1.0);
-	return lerp(a, b, h) - k*h*(1.0-h);
-
-var needs_respawning : bool = false
-var num_checkpoints_used : int = 0
-
-func _create_checkpoint() -> void:
-	checkpoint_pos = global_position
-	checkpoint_facing = face_angle
-	if checkpoint_flag and is_instance_valid(checkpoint_flag):
-		checkpoint_flag.queue_free()
-	checkpoint_flag = preload("res://mario/checkpoint_flag.tscn").instantiate()
-	checkpoint_flag.position = checkpoint_pos
-	SOGlobal.add_child(checkpoint_flag)
-	checkpoint_flag.get_node("AnimationPlayer").play("flag_spawn")
-	SOGlobal.play_sound(preload("res://mario/sfx/sm64_drop_into_course.wav"))
-
-func _restore_mario_to_checkpoint() -> void:
-	num_checkpoints_used += 1
-	teleport(checkpoint_pos)
-	_cam_target_height = position.y
-	set_angle(Quaternion.from_euler(Vector3.FORWARD.rotated(Vector3.UP, checkpoint_facing)))
-	velocity = Vector3.ZERO
-	_velocity = Vector3.ZERO
-	set_forward_velocity(0)
-	velocity = Vector3.ZERO
-	face_angle =checkpoint_facing
-	set_forward_velocity(0.0)
-	SOGlobal.play_sound(preload("res://mario/sfx/sm64_spinning_heart.wav"))
-	action = LibSM64.ACT_IDLE
-
-var time_since_start : float = 0
-var view_stage_transform : Transform3D
-
-func _calculate_gameplay_camera(delta : float):
-	if Input.is_action_just_pressed("cam_stick_left"):
-		if SOGlobal.flip_x:
-			_cam_rotation_target -= deg_to_rad(45)
-		else:
-			_cam_rotation_target += deg_to_rad(45)
-	if Input.is_action_just_pressed("cam_stick_right"):
-		if SOGlobal.flip_x:
-			_cam_rotation_target += deg_to_rad(45)
-		else:
-			_cam_rotation_target -= deg_to_rad(45)
-
-	if Input.is_action_just_pressed("cam_stick_down"):
-		_cam_zoom += 1
-	if Input.is_action_just_pressed("cam_stick_up"):
-		_cam_zoom -= 1
-
-	_cam_zoom = clampi(_cam_zoom, 0, 2)
-
-	var target_height : float = 10
-	var target_dist : float = 5
-	var target_lookat : float = 1.4
-	match _cam_zoom:
-		0:
-			target_height = 4
-			target_dist = 10
-			target_lookat = 1.6
-		1:
-			target_height = 6
-			target_dist = 14
-			target_lookat = 2.0
-		2:
-			target_height = 8
-			target_dist = 18
-			target_lookat = 2.6
-
-	_cam_rotation = lerp(_cam_rotation, _cam_rotation_target, delta * 12)
-	_cam_height = lerp(_cam_height, target_height, delta * 12)
-	_cam_dist = lerp(_cam_dist, target_dist, delta * 12)
-	camera.rotation = Vector3(0, _cam_rotation, 0)
-	camera.fov = 45
-	var height_diff := min(absf(_cam_target_height - position.y), 2)
-	_cam_target_height = move_toward(_cam_target_height, position.y, delta * 6 * height_diff)
-	var face_dir = Basis.IDENTITY.rotated(Vector3(0, 1, 0), _face_angle)
-	var target_look = face_dir.x * -target_lookat + Vector3(0, 1, 0)
-	var dist_to_target = (target_look - _cam_target).length() * 2
-	_cam_target = _cam_target.move_toward(target_look, minf(dist_to_target, 0.5) * delta * 4)
-	var look_to = Vector3(position.x, smin(_cam_target_height, position.y + 4, 1.5), position.z) + _cam_target
-
-	#DebugDraw3D.draw_sphere(look_to, 0.1, Color(1, 0, 0), delta)
-	#DebugDraw3D.draw_arrow_line(position + Vector3(0, 0.5, 0), position + Vector3(0, 0.5, 0) - face_dir.x, Color(0, 1, 0), 0.1, true, delta)
-
-	var camera_basis = Basis.IDENTITY.rotated(Vector3(0, 1, 0), _cam_rotation)
-	camera.position = Vector3(position.x, _cam_target_height, position.z) + camera_basis.z * _cam_dist + Vector3(0, _cam_height, 0)
-	#camera.position = snapped(camera.position, Vector3(1.0 / 32.0, 1.0 / 32.0, 1.0 / 32.0))
-	camera.look_at(look_to)
-	var angle_snap : float = 360.0 / 65536.0
-	camera.global_rotation_degrees = snapped(camera.global_rotation_degrees, Vector3(angle_snap, angle_snap, angle_snap))
-
-
-var hide_hud : bool = false
-var hide_hud_old : bool = false
-var gravity_add : float = 0.0
-var gravity_set_time : int = 0
 
 
 func _tick() -> void:
