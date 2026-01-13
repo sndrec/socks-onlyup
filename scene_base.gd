@@ -1,6 +1,6 @@
 extends Node3D
 
-@onready var sm_64_mario := $Mario as LibSM64Mario
+@onready var sm_64_mario := $Mario
 @onready var sm_64_static_surface_handler: LibSM64StaticSurfacesHandler = $SM64StaticSurfaceHandler
 @onready var sm_64_surface_objects_handler: LibSM64SurfaceObjectsHandler = $SM64SurfaceObjectsHandler
 @onready var world_environment := $WorldEnvironment as WorldEnvironment
