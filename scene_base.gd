@@ -20,18 +20,11 @@ func _create_mario_world(useSeed = str(randi())) -> void:
 
 	if _is_libsm64_init:
 		LibSM64Global.terminate()
-		
-	for child in get_children():
-		if child is Camera3D:
-			sm_64_mario.camera = child
-			break
 
 	_is_libsm64_init = LibSM64Global.init()
 	
 	sm_64_static_surface_handler.load_static_surfaces()
 	sm_64_surface_objects_handler.load_all_surface_objects()
-	
-
 	
 	sm_64_mario.create()
 	SOGlobal.level_start_time = Time.get_ticks_msec()
