@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://cg8l4angkunu5"]
+[gd_scene load_steps=23 format=3 uid="uid://cg8l4angkunu5"]
 
 [ext_resource type="Script" uid="uid://c40gd2jyr50o7" path="res://mario/mario.gd" id="1_op52n"]
 [ext_resource type="FontFile" uid="uid://c25d003g01x4h" path="res://mario/Mario64.ttf" id="2_3w352"]
@@ -11,6 +11,8 @@
 [ext_resource type="Texture2D" uid="uid://cen8uruthosia" path="res://mario/power_text_mask.png" id="8_xynuk"]
 [ext_resource type="Texture2D" uid="uid://csm3y75usd5u5" path="res://mario/health_slices.png" id="9_0e7ou"]
 [ext_resource type="Shader" uid="uid://dm2r3fx38qq7f" path="res://mario/health_slices.gdshader" id="9_03fle"]
+[ext_resource type="Shader" uid="uid://bdx3jrbbextuk" path="res://mario/level_mask_shader.gdshader" id="12_nh0yd"]
+[ext_resource type="Texture2D" uid="uid://buauiqv2dkyp0" path="res://asset/gameplay/level_start_fade_mask.png" id="13_13o4e"]
 
 [sub_resource type="AudioStreamPolyphonic" id="AudioStreamPolyphonic_a3013"]
 
@@ -60,6 +62,11 @@ shader_parameter/checkerTexture = ExtResource("6_0vgae")
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_ya0m5"]
 shader = ExtResource("9_03fle")
 shader_parameter/wedges = 8.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_13o4e"]
+shader = ExtResource("12_nh0yd")
+shader_parameter/in_mask = ExtResource("13_13o4e")
+shader_parameter/in_time = 3.24
 
 [node name="Mario" type="Node3D"]
 script = ExtResource("1_op52n")
@@ -222,5 +229,17 @@ size_flags_vertical = 0
 texture = ExtResource("9_0e7ou")
 expand_mode = 2
 stretch_mode = 4
+
+[node name="LevelMaskRect" type="ColorRect" parent="."]
+texture_filter = 4
+texture_repeat = 1
+material = SubResource("ShaderMaterial_13o4e")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 6
+size_flags_vertical = 6
 
 [connection signal="health_wedges_changed" from="." to="PowerDisp" method="_on_mario_health_wedges_changed"]

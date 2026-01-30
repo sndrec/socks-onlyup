@@ -7,16 +7,17 @@ uniform sampler2D slope_texture_albedo : source_color,filter_linear_mipmap,repea
 uniform sampler2D texture_gradient : source_color,filter_linear_mipmap,repeat_enable;
 uniform vec3 color_multiply;
 uniform float outer_time;
-instance uniform float fade_in;
-instance uniform float fade_in_duration;
-instance uniform float fade_in_distance;
-instance uniform vec3 spawn_dir;
+//instance uniform float fade_in;
+//instance uniform float fade_in_duration;
+//instance uniform float fade_in_distance;
+//instance uniform vec3 spawn_dir;
 instance uniform vec3 spawn_pos;
 varying vec3 world_pos;
 varying vec3 use_normal;
 varying vec2 UVX;
 varying vec2 UVY;
 varying vec2 UVZ;
+instance uniform bool dither;
 
 const float PHI = 1.61803398874989484820459;  // Φ = Golden Ratio   
 const float limit_table[16] =
@@ -48,11 +49,11 @@ float noise(vec2 p){
 	return res*res;
 }
 
-float spawn_ratio()
-{
-	float initial_ratio = clamp((outer_time - fade_in) * (1.0 / fade_in_duration), 0.0, 1.0);
-	return pow(1.0 - initial_ratio, 2.0);
-}
+//float spawn_ratio()
+//{
+	//float initial_ratio = clamp((outer_time - fade_in) * (1.0 / fade_in_duration), 0.0, 1.0);
+	//return pow(1.0 - initial_ratio, 2.0);
+//}
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	use_normal = NORMAL;
@@ -61,7 +62,7 @@ void vertex() {
 	UVY = (VERTEX + spawn_pos).zx * 0.25;
 	VERTEX = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	NORMAL = normalize((MODELVIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
-	VERTEX = VERTEX + spawn_dir * fade_in_distance * spawn_ratio() * noise(world_pos.xy + world_pos.yz) + NORMAL * ((spawn_ratio() * fade_in_distance) + 0.001);
+	//VERTEX = VERTEX + spawn_dir * fade_in_distance * spawn_ratio() * noise(world_pos.xy + world_pos.yz) + NORMAL * ((spawn_ratio() * fade_in_distance) + 0.001);
 }
 
 vec3 rgb2hsv(vec3 c)
@@ -99,7 +100,8 @@ float linear_depth(in float depth, in vec2 screen_uv, in mat4 inv_projection_mat
 }
 
 void fragment() {
-	
+	if (dither){
+		
     int x = int(FRAGCOORD.x) % 4;
     int y = int(FRAGCOORD.y) % 4;
     int index = x + y * 4;
@@ -110,14 +112,15 @@ void fragment() {
         limit = limit_table[index];
         tp_limit = float((index & 5) != 0);
     }
-	if (limit <= spawn_ratio()){
-		discard;
-	}
-	if (limit > length(VERTEX) * 0.25 - 1.0 && FRONT_FACING){
-		discard;
-	}
-	if (!FRONT_FACING && limit >= 0.5){
-		discard;
+		//if (limit <= spawn_ratio()){
+			//discard;
+		//}
+		if (limit > length(VERTEX) * 0.25 - 1.0 && FRONT_FACING){
+			discard;
+		}
+		if (!FRONT_FACING && limit >= 0.5){
+			discard;
+		}
 	}
 	//if (tp_limit < 0.5){
 	//	discard;

@@ -21,6 +21,6 @@ void sky() {
 	use_color_blurred *= 1.0;
 	use_color_blurred = max(vec3(0.0, 0.0, 0.0), use_color_blurred);
 	float one_zero_one = (sin(use_uv.y - 2.08) + 1.0) * 8.0;
-	//COLOR = vec3(one_zero_one);
-	COLOR = mix((use_color + use_color_blurred) * 0.5, ramp, pow(one_zero_one, 0.333));
+	COLOR = (use_color + use_color_blurred) * 0.5;
+	//COLOR = mix((use_color + use_color_blurred) * 0.5, ramp, pow(one_zero_one, 0.333));
 }

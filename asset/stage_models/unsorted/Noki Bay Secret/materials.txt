@@ -1,0 +1,91 @@
+_glass
+======
+  Textures:
+
+  Ambient Colors:
+    - 128, 128, 128, 50
+
+  Material Colors:
+    - 62, 22, 85, 76
+    - 62, 22, 85, 76
+
+  Color Registers:
+    - 122, 28, 24, 260
+
+
+
+_glass_1
+========
+  Textures:
+    - B_Kmap_glass
+        Offset: 1.6650390625, -0.126953125
+        Scale: -2.7490234375, 0.0830078125
+        Rotation: -0.40824610126041444
+
+  Ambient Colors:
+    - 128, 128, 128, 50
+
+
+
+_kui
+====
+  Textures:
+
+  Ambient Colors:
+    - 128, 128, 128, 50
+
+
+
+_naname
+=======
+  Textures:
+    - B_cerenaEX0_en
+
+  Ambient Colors:
+    - 128, 128, 128, 50
+
+  Material Colors:
+    - 253, 165, 116, 255
+    - 253, 165, 116, 255
+
+
+
+_oMTR
+=====
+  Textures:
+    - B_cerenaEX0_en
+
+  Ambient Colors:
+    - 128, 128, 128, 50
+
+  Material Colors:
+    - 234, 234, 234, 255
+    - 234, 234, 234, 255
+
+
+
+_waku
+=====
+  Textures:
+    - B_cerenaEX0_en
+
+  Ambient Colors:
+    - 128, 128, 128, 50
+
+  Material Colors:
+    - 253, 165, 116, 255
+    - 253, 165, 116, 255
+
+
+
+_yajirushi
+==========
+  Textures:
+    - B_yajirushiEX
+
+  Ambient Colors:
+    - 128, 128, 128, 50
+
+  Material Colors:
+    - 231, 174, 167, 255
+    - 231, 174, 167, 255

@@ -1,0 +1,16 @@
+[gd_scene load_steps=5 format=3 uid="uid://cokqvi64xudw7"]
+
+[ext_resource type="ArrayMesh" uid="uid://s105fp1uote5" path="res://asset/gameplay/sign/Sign.obj" id="1_6ytet"]
+[ext_resource type="Script" uid="uid://bl0pfpmowxtu1" path="res://addons/libsm64_godot/components/libsm64_surface_properties_component.gd" id="2_gxls3"]
+[ext_resource type="Script" uid="uid://dq4tromb8mnaf" path="res://game_objects/sign.gd" id="2_snylq"]
+
+[sub_resource type="LibSM64SurfaceProperties" id="LibSM64SurfaceProperties_snylq"]
+terrain_type = 1
+
+[node name="Sign" type="MeshInstance3D"]
+mesh = ExtResource("1_6ytet")
+script = ExtResource("2_snylq")
+
+[node name="SM64SurfacePropertiesComponent" type="Node" parent="."]
+script = ExtResource("2_gxls3")
+surface_properties = SubResource("LibSM64SurfaceProperties_snylq")

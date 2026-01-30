@@ -1,0 +1,44 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://dp1vbf8f75py1"
+path.s3tc="res://.godot/imported/peach_castle_1FEE462_c.png-7cf188e8d10598f5a85c00d996d80dd9.s3tc.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
+}
+generator_parameters={
+"md5": "caf4215f78836ff3b70dced8fc3d4c74"
+}
+
+[deps]
+
+source_file="res://asset/stage_models/floor_1/peach_castle/peach_castle_1FEE462_c.png"
+dest_files=["res://.godot/imported/peach_castle_1FEE462_c.png-7cf188e8d10598f5a85c00d996d80dd9.s3tc.ctex"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/channel_remap/red=0
+process/channel_remap/green=1
+process/channel_remap/blue=2
+process/channel_remap/alpha=3
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

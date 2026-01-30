@@ -12,6 +12,7 @@ extends LibSM64Mario
 @onready var respawn_timer := $RespawnTimer
 
 const HOLD_DURATION_TO_RESPAWN := 5.0
+@onready var level_mask_rect: ColorRect = $LevelMaskRect
 
 var _cam_rotation := 0.0
 var _cam_rotation_target := 0.0
@@ -52,7 +53,26 @@ func _ready() -> void:
 	_metal_material.vertex_color_is_srgb = true
 	_wing_material.vertex_color_is_srgb = true
 	_update_power_disp_color()
+	_cam_rotation_target = deg_to_rad(SOGlobal.start_angle)
+	_cam_rotation = deg_to_rad(SOGlobal.start_angle)
 	super()
+	change_mask_state(0, 1)
+	#await get_tree().create_timer(1).timeout
+	#change_mask_state(1, 2)
+	#await get_tree().create_timer(3).timeout
+	#change_mask_state(0, 1)
+
+var mask_timer := 0.0
+var mask_length := 0.0
+var mask_state := 0
+
+#state = 0 for 'spawning' type mask
+#state = 1 for 'exiting' type mask
+
+func change_mask_state(in_state : int, in_length) -> void:
+	mask_state = in_state
+	mask_length = in_length
+	mask_timer = 0
 
 func _process(delta: float) -> void:
 	if _id < 0:
@@ -61,6 +81,19 @@ func _process(delta: float) -> void:
 		return
 	if _paused:
 		return
+	var target_mask_scale := 0.0
+	if mask_state == 0:
+		if mask_timer > mask_length:
+			level_mask_rect.visible = false
+		else:
+			level_mask_rect.visible = true
+		target_mask_scale = remap(mask_timer, 0, mask_length, 0, 3)
+	else:
+		level_mask_rect.visible = true
+		target_mask_scale = remap(mask_timer, 0, mask_length, 3, 0)
+	mask_timer += delta
+	var shader : ShaderMaterial = level_mask_rect.material
+	shader.set_shader_parameter("in_time", target_mask_scale)
 	
 	if position.y <= -32:
 		if checkpoint_flag and is_instance_valid(checkpoint_flag):

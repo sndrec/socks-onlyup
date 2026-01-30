@@ -10,7 +10,7 @@ var block_material := preload("res://mario/block_material.tres") as ShaderMateri
 var sky_material := preload("res://mario/sky_material.tres") as ShaderMaterial
 var global_sound := AudioStreamPlayer.new() as AudioStreamPlayer
 var global_sound_stream := AudioStreamPolyphonic.new() as AudioStreamPolyphonic
-var start_angle := 0.0
+var start_angle := -135
 #var save_data := MarioSaveFile.new()
 var total_coins : int = 0
 var main_star_pos : Vector3 = Vector3.ZERO
@@ -23,33 +23,33 @@ func play_sound(inSound, volume : float = 0, pitch : float = 1) -> void:
 	var playback : AudioStreamPlaybackPolyphonic = global_sound.get_stream_playback()
 	playback.play_stream(inSound, 0, volume, pitch)
 
-func generate_power_star(in_star_id : String, in_pos : Vector3, in_target_pos : Vector3 = Vector3.ZERO) -> PowerStar:
-	var new_star : PowerStar = preload("res://mario/power_star.tscn").instantiate()
-	#new_star.star_gotten = save_data.is_star_collected(in_star_id)
-	print(new_star.star_gotten)
-	new_star.position = in_pos
-	new_star.star_id = in_star_id
-	add_child(new_star)
-	if in_target_pos != Vector3.ZERO:
-		new_star.play_star_spawn_animation(in_target_pos)
-	return new_star
+#func generate_power_star(in_star_id : String, in_pos : Vector3, in_target_pos : Vector3 = Vector3.ZERO) -> PowerStar:
+	#var new_star : PowerStar = preload("res://mario/power_star.tscn").instantiate()
+	##new_star.star_gotten = save_data.is_star_collected(in_star_id)
+	#print(new_star.star_gotten)
+	#new_star.position = in_pos
+	#new_star.star_id = in_star_id
+	#add_child(new_star)
+	#if in_target_pos != Vector3.ZERO:
+		#new_star.play_star_spawn_animation(in_target_pos)
+	#return new_star
+#
+#func generate_cork_box_with_contents(in_pos : Vector3, contents : Array) -> CorkBox:
+	#var new_box : CorkBox = preload("res://mario/cork_block.tscn").instantiate()
+	#new_box.position = in_pos
+	#new_box.contained_items = contents
+	#add_child(new_box)
+	#return new_box
 
-func generate_cork_box_with_contents(in_pos : Vector3, contents : Array) -> CorkBox:
-	var new_box : CorkBox = preload("res://mario/cork_block.tscn").instantiate()
-	new_box.position = in_pos
-	new_box.contained_items = contents
-	add_child(new_box)
-	return new_box
-
-func generate_yellow_coin_at_pos(inPos : Vector3, in_drop_to_ground : bool = true, in_physics : bool = false, in_velocity : Vector3 = Vector3.ZERO) -> Coin:
-	var new_coin := preload("res://mario/coin.tscn").instantiate() as Coin
-	new_coin.position = inPos
-	new_coin.velocity = in_velocity
-	new_coin.drop_to_ground = in_drop_to_ground
-	SOGlobal.add_child(new_coin)
-	if in_physics:
-		new_coin._set_physics_enabled(true)
-	return new_coin
+#func generate_yellow_coin_at_pos(inPos : Vector3, in_drop_to_ground : bool = true, in_physics : bool = false, in_velocity : Vector3 = Vector3.ZERO) -> Coin:
+	#var new_coin := preload("res://mario/coin.tscn").instantiate() as Coin
+	#new_coin.position = inPos
+	#new_coin.velocity = in_velocity
+	#new_coin.drop_to_ground = in_drop_to_ground
+	#SOGlobal.add_child(new_coin)
+	#if in_physics:
+		#new_coin._set_physics_enabled(true)
+	#return new_coin
 
 func generate_block_from_pos_and_size(inPos : Vector3, inSize : Vector3, north_slope : float = 0, east_slope : float = 0, south_slope : float = 0, west_slope : float = 0, in_parent = SOGlobal, move_mode : LevelBlock.move_type = LevelBlock.move_type.NONE, chatter : bool = false) -> LevelBlock:
 	var new_block := LevelBlock.new()
@@ -123,7 +123,6 @@ func generate_block_from_pos_and_size(inPos : Vector3, inSize : Vector3, north_s
 
 func generate_cylinder(inPos : Vector3, in_height : float, in_radius_bot : float, in_radius_top : float, in_parent = SOGlobal, move_mode : LevelBlock.move_type = LevelBlock.move_type.NONE, chatter : bool = false) -> LevelBlock:
 	var new_block := LevelBlock.new()
-	new_block.coin_surface = LevelBlock.coin_spawn_type.CIRCLE
 	new_block.block_size = Vector3(in_radius_top, in_radius_bot, 0)
 	var new_mesh : CylinderMesh = CylinderMesh.new()
 	new_mesh.height = in_height
